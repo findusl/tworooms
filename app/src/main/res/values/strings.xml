@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Two Rooms and a boom</string>
+    <string name="title_set_detail">set Detail</string>
+    <string name="hint_search_query">Anzahl Spieler eingeben</string>
+    <string name="title_role_list">Roles</string>
+    <string name="title_role_detail">Role Detail</string>
+    <string name="title_activity_create_set">CreateSetActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="next">weiter</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
