@@ -15,7 +15,7 @@
         android:id="@+id/listSelectRoles"
         android:layout_gravity="center_horizontal"
         android:layout_weight="5"
-        android:clickable="true"
+        android:clickable="false"
         android:choiceMode="multipleChoice" />
 
     <Button

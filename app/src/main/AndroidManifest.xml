@@ -32,6 +32,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.lehrbaum.tworooms.view.setListActivity" />
         </activity>
+
+        <provider
+            android:name=".io.DatabaseContentProvder"
+            android:authorities="de.lehrbaum.tworooms.database"
+            android:enabled="true"
+            android:exported="false" >
+        </provider>
     </application>
 
 </manifest>

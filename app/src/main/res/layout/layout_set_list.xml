@@ -18,7 +18,6 @@
         android:drawSelectorOnTop="false"
         android:layout_below="@id/search_field"
         android:layout_alignParentBottom="true"
-        android:choiceMode="singleChoice"
         android:clickable="true"
         android:fastScrollEnabled="true" />
 
