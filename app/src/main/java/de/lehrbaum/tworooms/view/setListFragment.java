@@ -4,15 +4,20 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
+import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvder;
 import de.lehrbaum.tworooms.view.dummy.DummyContent;
 
@@ -20,12 +25,12 @@ import de.lehrbaum.tworooms.view.dummy.DummyContent;
  * A list fragment representing a list of sets. This fragment
  * also supports tablet devices by allowing list items to be given an
  * 'activated' state upon selection. This helps indicate which item is
- * currently being viewed in a {@link setDetailFragment}.
+ * currently being viewed in a {@link SetDetailFragment}.
  * <p/>
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class setListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class SetListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -33,11 +38,13 @@ public class setListFragment extends ListFragment implements LoaderManager.Loade
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
+    private static final int MENU_ADD_ITEM_ID = 3;
+
     /**
      * The fragment's current callback object, which is notified of list item
      * clicks.
      */
-    private Callbacks mCallbacks = sDummyCallbacks;
+    private Callbacks mCallbacks;
 
     /**
      * The current activated item position. Only used on tablets.
@@ -55,14 +62,14 @@ public class setListFragment extends ListFragment implements LoaderManager.Loade
         /**
          * Callback for when an item has been selected.
          */
-        public void onItemSelected(String id);
+        void onItemSelected(String id);
     }
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public setListFragment() {
+    public SetListFragment() {
     }
 
     @Override
@@ -74,6 +81,7 @@ public class setListFragment extends ListFragment implements LoaderManager.Loade
                 new String[] {"name"}, new int[]{android.R.id.text1}, 0);
 
         setListAdapter(mAdapter);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -85,6 +93,24 @@ public class setListFragment extends ListFragment implements LoaderManager.Loade
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        MenuItem item = menu.add(Menu.NONE, MENU_ADD_ITEM_ID, Menu.NONE, R.string.menu_set_create);
+        item.setIcon(android.R.drawable.ic_menu_add);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case MENU_ADD_ITEM_ID:
+                Intent createIntent = new Intent(this.getActivity(), CreateSetActivity.class);
+                startActivity(createIntent);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -118,9 +144,7 @@ public class setListFragment extends ListFragment implements LoaderManager.Loade
     @Override
     public void onDetach() {
         super.onDetach();
-
-        // Reset the active callbacks interface to the dummy implementation.
-        mCallbacks = sDummyCallbacks;
+        mCallbacks = null;
     }
 
     @Override
@@ -162,14 +186,4 @@ public class setListFragment extends ListFragment implements LoaderManager.Loade
 
         mActivatedPosition = position;
     }
-
-    /**
-     * A dummy implementation of the {@link Callbacks} interface that does
-     * nothing. Used only when this fragment is not attached to an activity.
-     */
-    private static final Callbacks sDummyCallbacks = new Callbacks() {
-        @Override
-        public void onItemSelected(String id) {
-        }
-    };
 }

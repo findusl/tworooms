@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".view.setListActivity"
+            android:name=".view.SetListActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,20 +17,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.setDetailActivity"
+            android:name=".view.SetDetailActivity"
             android:label="@string/title_set_detail"
-            android:parentActivityName=".view.setListActivity" >
+            android:parentActivityName=".view.SetListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.setListActivity" />
+                android:value=".view.SetListActivity" />
         </activity>
         <activity
             android:name=".view.CreateSetActivity"
             android:label="@string/title_activity_create_set"
-            android:parentActivityName=".view.setListActivity" >
+            android:parentActivityName=".view.SetListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.lehrbaum.tworooms.view.setListActivity" />
+                android:value=".view.SetListActivity" />
         </activity>
 
         <provider

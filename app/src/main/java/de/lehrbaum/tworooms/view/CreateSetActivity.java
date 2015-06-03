@@ -1,20 +1,27 @@
 package de.lehrbaum.tworooms.view;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import de.lehrbaum.tworooms.R;
 
-public class CreateSetActivity extends ActionBarActivity {
+public class CreateSetActivity extends Activity implements ChooseSetRoleFragment.Callbacks, FinishSetFragment.OnFragmentInteractionListener{
+
+    private List<long[]> mVariations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_set);
+        mVariations = new ArrayList<long []>();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -25,9 +32,6 @@ public class CreateSetActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -36,5 +40,30 @@ public class CreateSetActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onListSubmitted(long[] entries) {
+        mVariations.add(entries);
+        //TODO: future reuse fragment
+        Fragment f = FinishSetFragment.newInstance(mVariations.size());
+        getFragmentManager().beginTransaction().replace(R.id.fragmentContainer, f).commit();
+    }
+
+    @Override
+    public void onVariationClicked(int i) {
+        Fragment f = ChooseSetRoleFragment.newInstance(mVariations.get(i));
+        getFragmentManager().beginTransaction().replace(R.id.fragmentContainer, f).commit();
+    }
+
+    @Override
+    public void onCreateNewVariation() {
+        Fragment f = ChooseSetRoleFragment.newInstance(null);
+        getFragmentManager().beginTransaction().replace(R.id.fragmentContainer, f).commit();
+    }
+
+    @Override
+    public void onFinishSetClick(String name, String description) {
+
     }
 }

@@ -1,8 +1,9 @@
 package de.lehrbaum.tworooms.view;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 import de.lehrbaum.tworooms.R;
 
@@ -11,20 +12,20 @@ import de.lehrbaum.tworooms.R;
  * An activity representing a list of sets. This activity
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link setDetailActivity} representing
+ * lead to a {@link SetDetailActivity} representing
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  * <p/>
  * The activity makes heavy use of fragments. The list of items is a
- * {@link setListFragment} and the item details
- * (if present) is a {@link setDetailFragment}.
+ * {@link SetListFragment} and the item details
+ * (if present) is a {@link SetDetailFragment}.
  * <p/>
  * This activity also implements the required
- * {@link setListFragment.Callbacks} interface
+ * {@link SetListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class setListActivity extends FragmentActivity
-        implements setListFragment.Callbacks {
+public class SetListActivity extends Activity
+        implements SetListFragment.Callbacks {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -46,7 +47,7 @@ public class setListActivity extends FragmentActivity
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
-            ((setListFragment) getSupportFragmentManager()
+            ((SetListFragment) getFragmentManager()
                     .findFragmentById(R.id.set_list))
                     .setActivateOnItemClick(true);
         }
@@ -54,7 +55,7 @@ public class setListActivity extends FragmentActivity
     }
 
     /**
-     * Callback method from {@link setListFragment.Callbacks}
+     * Callback method from {@link SetListFragment.Callbacks}
      * indicating that the item with the given ID was selected.
      */
     @Override
@@ -64,18 +65,18 @@ public class setListActivity extends FragmentActivity
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(setDetailFragment.ARG_ITEM_ID, id);
-            setDetailFragment fragment = new setDetailFragment();
+            arguments.putString(SetDetailFragment.ARG_ITEM_ID, id);
+            Fragment fragment = new SetDetailFragment();
             fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .replace(R.id.set_detail_container, fragment)
                     .commit();
 
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
-            Intent detailIntent = new Intent(this, setDetailActivity.class);
-            detailIntent.putExtra(setDetailFragment.ARG_ITEM_ID, id);
+            Intent detailIntent = new Intent(this, SetDetailActivity.class);
+            detailIntent.putExtra(SetDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
     }

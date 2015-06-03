@@ -1,12 +1,16 @@
 package de.lehrbaum.tworooms.view;
 
 import android.app.Activity;
+import android.app.ListFragment;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import de.lehrbaum.tworooms.R;
 
@@ -18,32 +22,25 @@ import de.lehrbaum.tworooms.R;
  * Use the {@link FinishSetFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FinishSetFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+public class FinishSetFragment extends ListFragment {
+    public static final String VARIATIONS_COUNT = "var_count";
 
     private OnFragmentInteractionListener mListener;
+
+    private int variationsCount;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param variationsCount
      * @return A new instance of fragment FinishSetFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FinishSetFragment newInstance(String param1, String param2) {
+    public static FinishSetFragment newInstance(int variationsCount) {
         FinishSetFragment fragment = new FinishSetFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putInt(VARIATIONS_COUNT, variationsCount);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,9 +53,17 @@ public class FinishSetFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            variationsCount = getArguments().getInt(VARIATIONS_COUNT);
         }
+
+        String [] options = new String [variationsCount+2];
+        for(int i = 0; i < variationsCount; i++) {
+            options[i] = getActivity().getString(R.string.option_set_variations) + ' ' + i;
+        }
+        options[variationsCount] = getActivity().getString(R.string.option_create_new_variation);
+        options[variationsCount+1] = getActivity().getString(R.string.option_finish_set);
+
+        setListAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_activated_1, options));
     }
 
     @Override
@@ -68,17 +73,27 @@ public class FinishSetFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_finish_set, container, false);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        if(position < variationsCount) {
+            mListener.onVariationClicked(position);
+        } else {
+            switch (position-variationsCount) {
+                case 0:
+                    mListener.onCreateNewVariation();
+                    break;
+                case 1:
+                    TextView name = (TextView) getView().findViewById(R.id.editText);
+                    mListener.onFinishSetClick(name.getText().toString(), "");
+                    break;
+            }
         }
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        try {
+        try{
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
@@ -92,19 +107,12 @@ public class FinishSetFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onVariationClicked(int i);
+
+        public void onCreateNewVariation();
+
+        public void onFinishSetClick(String name, String description);
     }
 
 }

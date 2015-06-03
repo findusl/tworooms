@@ -1,5 +1,6 @@
 package de.lehrbaum.tworooms.view;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -13,12 +14,12 @@ import de.lehrbaum.tworooms.R;
  * An activity representing a single set detail screen. This
  * activity is only used on handset devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link setListActivity}.
+ * in a {@link SetListActivity}.
  * <p/>
  * This activity is mostly just a 'shell' activity containing nothing
- * more than a {@link setDetailFragment}.
+ * more than a {@link SetDetailFragment}.
  */
-public class setDetailActivity extends ActionBarActivity {
+public class SetDetailActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +27,7 @@ public class setDetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_set_detail);
 
         // Show the Up button in the action bar.
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -41,11 +42,11 @@ public class setDetailActivity extends ActionBarActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(setDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(setDetailFragment.ARG_ITEM_ID));
-            setDetailFragment fragment = new setDetailFragment();
+            arguments.putString(SetDetailFragment.ARG_ITEM_ID,
+                    getIntent().getStringExtra(SetDetailFragment.ARG_ITEM_ID));
+            SetDetailFragment fragment = new SetDetailFragment();
             fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .add(R.id.set_detail_container, fragment)
                     .commit();
         }
@@ -62,7 +63,7 @@ public class setDetailActivity extends ActionBarActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            NavUtils.navigateUpTo(this, new Intent(this, setListActivity.class));
+            NavUtils.navigateUpTo(this, new Intent(this, SetListActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
