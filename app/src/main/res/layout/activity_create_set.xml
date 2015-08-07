@@ -1,12 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragmentContainer"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <fragment android:id="@+id/fragment"
-        android:name="de.lehrbaum.tworooms.view.ChooseSetRoleFragment"
-        tools:layout="@layout/fragment_choose_set_roles" android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
 </FrameLayout>

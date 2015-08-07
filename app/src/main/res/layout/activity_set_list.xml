@@ -1,10 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/set_list"
-    android:name="de.lehrbaum.tworooms.view.SetListFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-    android:layout_marginRight="@dimen/activity_horizontal_margin"
-    tools:context=".setListActivity"
-    tools:layout="@layout/layout_set_list" />
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/set_list"
+android:name="de.lehrbaum.tworooms.view.SetListFragment"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:layout_marginLeft="@dimen/activity_horizontal_margin"
+android:layout_marginRight="@dimen/activity_horizontal_margin"
+tools:context=".setListActivity"
+tools:layout="@layout/fragment_set_list" />

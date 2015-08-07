@@ -18,7 +18,7 @@
 
     <fragment android:id="@+id/set_list" android:name="de.lehrbaum.tworooms.view.SetListFragment"
         android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
-        tools:layout="@layout/layout_set_list" />
+        tools:layout="@layout/fragment_set_list" />
 
     <FrameLayout android:id="@+id/set_detail_container" android:layout_width="0dp"
         android:layout_height="match_parent" android:layout_weight="3" />

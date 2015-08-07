@@ -10,14 +10,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:text="@string/hint_set_name"
+        android:hint="@string/hint_set_name"
         android:ems="10"
         android:id="@+id/editText"
         android:layout_gravity="center_horizontal" />
 
     <ListView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/list"
+        android:id="@android:id/list"
         android:clickable="true" />
+
 </LinearLayout>

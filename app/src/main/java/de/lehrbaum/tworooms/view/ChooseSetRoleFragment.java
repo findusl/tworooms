@@ -8,9 +8,11 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -22,6 +24,8 @@ import de.lehrbaum.tworooms.io.DatabaseContentProvder;
  * A placeholder fragment containing a simple view.
  */
 public class ChooseSetRoleFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+    private static final String TAG = ChooseSetRoleFragment.class.getSimpleName();
+
     public static final String SELECTION_INDIZES = "selection_ind";
 
     private CursorAdapter mAdapter;
@@ -48,21 +52,35 @@ public class ChooseSetRoleFragment extends ListFragment implements LoaderManager
             selections = new long[0];
         }
 
+        //TODO: search for premade loading example because list takes time
         mAdapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_list_item_activated_1, null,
                 new String[] {"name"}, new int[]{android.R.id.text1}, 0);
 
         setListAdapter(mAdapter);
 
-        //TODO: need to find some way to select depending long
+        getLoaderManager().initLoader(0, null, this);
+
+        //TODO: need to find some way to select depending selections
     }
 
-    /*@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        //possibilty for future save selected roles in savedInstanceState and copy out again
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_choose_set_roles, container, false);
-    }*/
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        Log.v(TAG, "onViewCreated");
+        Button b = (Button)view.findViewById(R.id.buttonNext);
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSubmitClicked(v);
+            }
+        });
+        super.onViewCreated(view, savedInstanceState);
+    }
 
     public void onSubmitClicked(View view) {
         //react to submit button
@@ -84,12 +102,14 @@ public class ChooseSetRoleFragment extends ListFragment implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
+        Log.v(TAG, "on load finished called: " + data);
+        //TODO: make list show colors and maybe short description
+        mAdapter.changeCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
+        mAdapter.changeCursor(null);
     }
 
     @Override

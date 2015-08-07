@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="de.lehrbaum.tworooms.view.SetListFragments">
+
+    <item android:id="@+id/action_settings" android:title="@string/action_settings"
+        android:orderInCategory="100" android:showAsAction="never" />
+
+    <item android:id="@+id/menu_item_add"
+        android:title="@string/menu_set_create"
+        android:orderInCategory="1"
+        android:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_add"/>
+</menu>

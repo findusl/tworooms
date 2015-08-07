@@ -5,8 +5,10 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 public class DatabaseContentProvder extends ContentProvider {
+    private static final String TAG = DatabaseContentProvder.class.getSimpleName();
 
     protected LocalDatabaseConnection dbConnection;
 
@@ -25,43 +27,43 @@ public class DatabaseContentProvder extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        Log.v(TAG, "insert");
         getContext().getContentResolver().notifyChange(uri, null);
-        String table = uri.getPath();
+        String table = uri.getLastPathSegment();
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         long rowId = db.insert(table, null, values);
-        db.close();
         return Uri.withAppendedPath(CONTENT_URI, String.valueOf(rowId));
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
+        Log.v(TAG, "update");
         getContext().getContentResolver().notifyChange(uri, null);
-        String table = uri.getPath();
+        String table = uri.getLastPathSegment();
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         int count = db.update(table, values, selection, selectionArgs);
-        db.close();
         return count;
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Log.v(TAG, "delete");
         getContext().getContentResolver().notifyChange(uri, null);
-        String table = uri.getPath();
+        String table = uri.getLastPathSegment();
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         int count = db.delete(table, selection, selectionArgs);
-        db.close();
         return count;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        String table = uri.getPath();
+        Log.v(TAG, "query");
+        String table = uri.getLastPathSegment();
         SQLiteDatabase db = dbConnection.getReadableDatabase();
         Cursor c = db.query(table, projection, selection, selectionArgs, null, null, sortOrder);
         c.setNotificationUri(getContext().getContentResolver(), uri);
-        db.close();
         return c;
     }
 }

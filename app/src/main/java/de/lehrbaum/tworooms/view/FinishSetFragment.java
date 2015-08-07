@@ -2,7 +2,6 @@ package de.lehrbaum.tworooms.view;
 
 import android.app.Activity;
 import android.app.ListFragment;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
@@ -28,6 +27,8 @@ public class FinishSetFragment extends ListFragment {
     private OnFragmentInteractionListener mListener;
 
     private int variationsCount;
+
+    private ArrayAdapter<String> mAdapter;
 
     /**
      * Use this factory method to create a new instance of
@@ -58,12 +59,13 @@ public class FinishSetFragment extends ListFragment {
 
         String [] options = new String [variationsCount+2];
         for(int i = 0; i < variationsCount; i++) {
-            options[i] = getActivity().getString(R.string.option_set_variations) + ' ' + i;
+            options[i] = getActivity().getString(R.string.option_set_variation) + i;
         }
         options[variationsCount] = getActivity().getString(R.string.option_create_new_variation);
         options[variationsCount+1] = getActivity().getString(R.string.option_finish_set);
 
-        setListAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_activated_1, options));
+        mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_activated_1, options);
+        setListAdapter(mAdapter);
     }
 
     @Override
@@ -71,6 +73,11 @@ public class FinishSetFragment extends ListFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_finish_set, container, false);
+    }
+
+    public void increaseVariationsCount() {
+        mAdapter.insert(getActivity().getString(R.string.option_set_variation) + variationsCount, variationsCount);
+        variationsCount++;
     }
 
     @Override

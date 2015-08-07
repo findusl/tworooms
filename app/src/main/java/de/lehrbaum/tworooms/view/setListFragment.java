@@ -9,10 +9,12 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -31,14 +33,13 @@ import de.lehrbaum.tworooms.view.dummy.DummyContent;
  * interface.
  */
 public class SetListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+    private static final String TAG = SetListFragment.class.getSimpleName();
 
     /**
      * The serialization (saved instance state) Bundle key representing the
      * activated item position. Only used on tablets.
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
-
-    private static final int MENU_ADD_ITEM_ID = 3;
 
     /**
      * The fragment's current callback object, which is notified of list item
@@ -52,18 +53,6 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
     private CursorAdapter mAdapter;
-
-    /**
-     * A callback interface that all activities containing this fragment must
-     * implement. This mechanism allows activities to be notified of item
-     * selections.
-     */
-    public interface Callbacks {
-        /**
-         * Callback for when an item has been selected.
-         */
-        void onItemSelected(String id);
-    }
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -85,6 +74,11 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_set_list, container, false);
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -97,15 +91,14 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        MenuItem item = menu.add(Menu.NONE, MENU_ADD_ITEM_ID, Menu.NONE, R.string.menu_set_create);
-        item.setIcon(android.R.drawable.ic_menu_add);
+        inflater.inflate(R.menu.menu_set_list, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-            case MENU_ADD_ITEM_ID:
+            case R.id.menu_item_add:
                 Intent createIntent = new Intent(this.getActivity(), CreateSetActivity.class);
                 startActivity(createIntent);
                 return true;
@@ -185,5 +178,17 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
         }
 
         mActivatedPosition = position;
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callbacks {
+        /**
+         * Callback for when an item has been selected.
+         */
+        void onItemSelected(String id);
     }
 }

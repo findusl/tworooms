@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
 
 import de.lehrbaum.tworooms.R;
 
@@ -26,6 +28,7 @@ import de.lehrbaum.tworooms.R;
  */
 public class SetListActivity extends Activity
         implements SetListFragment.Callbacks {
+    private static final String TAG = SetListActivity.class.getSimpleName();
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -36,6 +39,7 @@ public class SetListActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(TAG, "on create");
         setContentView(R.layout.activity_set_list);
 
         if (findViewById(R.id.set_detail_container) != null) {
@@ -52,6 +56,11 @@ public class SetListActivity extends Activity
                     .setActivateOnItemClick(true);
         }
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**
