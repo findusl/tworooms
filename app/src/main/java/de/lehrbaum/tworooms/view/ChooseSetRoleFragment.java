@@ -14,11 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
-import android.widget.ListView;
+import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
 
+import java.util.Arrays;
+
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.DatabaseContentProvder;
+import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -26,18 +28,32 @@ import de.lehrbaum.tworooms.io.DatabaseContentProvder;
 public class ChooseSetRoleFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private static final String TAG = ChooseSetRoleFragment.class.getSimpleName();
 
-    public static final String SELECTION_INDIZES = "selection_ind";
+    private static final String SELECTION_INDIZES = "selection_ind";
+    private static final String SELECTION_POSITION = "selection_pos";
 
     private CursorAdapter mAdapter;
     private Callbacks mCallback;
+    private int mSelectionPosition = -1;
 
-    public static ChooseSetRoleFragment newInstance(long [] selection) {
+    /**
+     *
+     * @param position The position of the existing selection
+     * @param selection An exisiting selection that can be modified.
+     * @return
+     */
+    public static ChooseSetRoleFragment newInstance(int position, long [] selection) {
         ChooseSetRoleFragment fragment = new ChooseSetRoleFragment();
         if(selection != null) {
             Bundle args = new Bundle();
             args.putLongArray(SELECTION_INDIZES, selection);
+            args.putInt(SELECTION_POSITION, position);
             fragment.setArguments(args);
         }
+        return fragment;
+    }
+
+    public static ChooseSetRoleFragment newInstance() {
+        ChooseSetRoleFragment fragment = new ChooseSetRoleFragment();
         return fragment;
     }
 
@@ -47,6 +63,8 @@ public class ChooseSetRoleFragment extends ListFragment implements LoaderManager
         long [] selections;
         if (getArguments() != null) {
             selections = getArguments().getLongArray(SELECTION_INDIZES);
+            mSelectionPosition = getArguments().getInt(SELECTION_POSITION);
+            Log.i(TAG, "Selection with indizes: " + Arrays.toString(selections));
         }
         else {
             selections = new long[0];
@@ -56,12 +74,12 @@ public class ChooseSetRoleFragment extends ListFragment implements LoaderManager
         mAdapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_list_item_activated_1, null,
                 new String[] {"name"}, new int[]{android.R.id.text1}, 0);
-
         setListAdapter(mAdapter);
 
         getLoaderManager().initLoader(0, null, this);
 
-        //TODO: need to find some way to select depending selections
+        //TODO: need to find some way to select depending selections. sort selected items on top
+        //use setItemChecked method of ListView
     }
 
     @Override
@@ -91,25 +109,23 @@ public class ChooseSetRoleFragment extends ListFragment implements LoaderManager
             c.moveToPosition((int) selected[i]);
             selected[i] = c.getLong(0);
         }
-        mCallback.onListSubmitted(selected);
+        mCallback.onListSubmitted(mSelectionPosition, selected);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvder.CONTENT_URI, "roles");
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "roles");
         return new CursorLoader(getActivity(), uri, new String[]{"_id", "name"}, null /*TODO: count = people*/, null, null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.v(TAG, "on load finished called: " + data);
-        //TODO: make list show colors and maybe short description
-        mAdapter.changeCursor(data);
+        mAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.changeCursor(null);
+        mAdapter.swapCursor(null);
     }
 
     @Override
@@ -130,8 +146,9 @@ public class ChooseSetRoleFragment extends ListFragment implements LoaderManager
     public interface Callbacks {
         /**
          * Callback for when the list has been submitted.
+         * @param position The position to replace, or -1 if new variation.
          * @param entries The IDs of the selected roles.
          */
-        void onListSubmitted(long[] entries);
+        void onListSubmitted(int position, long[] entries);
     }
 }

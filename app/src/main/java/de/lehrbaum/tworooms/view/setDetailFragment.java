@@ -1,15 +1,24 @@
 package de.lehrbaum.tworooms.view;
 
-import android.app.Fragment;
+import android.app.ListFragment;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.content.CursorLoader;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.view.dummy.DummyContent;
+import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 /**
  * A fragment representing a single set detail screen.
@@ -17,47 +26,75 @@ import de.lehrbaum.tworooms.view.dummy.DummyContent;
  * in two-pane mode (on tablets) or a {@link SetDetailActivity}
  * on handsets.
  */
-public class SetDetailFragment extends Fragment {
+public class SetDetailFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
      */
-    public static final String ARG_ITEM_ID = "item_id";
+    public static final String ARG_SET_ID = "set_id";
 
-    /**
-     * The dummy content this fragment is presenting.
-     */
-    private DummyContent.DummyItem mItem;
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public SetDetailFragment() {
-    }
+    private CursorAdapter mAdapter;
+    private int setId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+        setId = getArguments().getInt(ARG_SET_ID, -1);
+        if(setId < 0) {
+            throw new IllegalArgumentException("Need item id >= 0 to display item details.");
         }
+
+        mAdapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_activated_1, null,
+                new String[] {"name"}, new int[]{android.R.id.text1}, 0);
+
+        setListAdapter(mAdapter);
+
+        getLoaderManager().initLoader(setId, null, this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_set_detail, container, false);
-
-        // Show the dummy content as text in a TextView.
-        if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.set_detail)).setText(mItem.content);
-        }
-
         return rootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "sets");
+        Cursor c = getActivity().getContentResolver().query(uri, new String[]{"name", "description"},
+                "_id = ?", new String[]{Integer.toString(setId)}, null);
+
+        String name = c.getString(0);
+        TextView nameView = (TextView) view.findViewById(R.id.name_view);
+        nameView.setText(name);
+
+        String desc = c.getString(1);
+        TextView descView = (TextView) view.findViewById(R.id.desc_view);
+        descView.setText(desc);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int setId, Bundle bundle) {
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "roles");
+        return new CursorLoader(getActivity(), uri,
+                new String[]{"_id", "name"},
+                DatabaseContentProvider.SET_ROLE_SELECTION,
+                new String[]{Integer.toString(setId)},
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
 }

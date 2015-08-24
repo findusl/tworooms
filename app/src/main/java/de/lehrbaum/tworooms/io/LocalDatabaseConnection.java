@@ -16,4 +16,6 @@ public class LocalDatabaseConnection extends SQLiteAssetHelper{
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         setForcedUpgrade();
     }
+
+    //TODO: remove autoincrement
 }

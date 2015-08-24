@@ -3,7 +3,6 @@ package de.lehrbaum.tworooms.view;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
@@ -42,8 +41,8 @@ public class SetDetailActivity extends Activity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SetDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(SetDetailFragment.ARG_ITEM_ID));
+            arguments.putInt(SetDetailFragment.ARG_SET_ID,
+                    getIntent().getIntExtra(SetDetailFragment.ARG_SET_ID, -1));
             SetDetailFragment fragment = new SetDetailFragment();
             fragment.setArguments(arguments);
             getFragmentManager().beginTransaction()

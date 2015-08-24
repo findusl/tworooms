@@ -18,51 +18,22 @@ import de.lehrbaum.tworooms.R;
  * Activities that contain this fragment must implement the
  * {@link FinishSetFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link FinishSetFragment#newInstance} factory method to
- * create an instance of this fragment.
  */
 public class FinishSetFragment extends ListFragment {
     public static final String VARIATIONS_COUNT = "var_count";
 
     private OnFragmentInteractionListener mListener;
 
-    private int variationsCount;
+    private int variationsCount = 0;
 
     private ArrayAdapter<String> mAdapter;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param variationsCount
-     * @return A new instance of fragment FinishSetFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FinishSetFragment newInstance(int variationsCount) {
-        FinishSetFragment fragment = new FinishSetFragment();
-        Bundle args = new Bundle();
-        args.putInt(VARIATIONS_COUNT, variationsCount);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public FinishSetFragment() {
-        // Required empty public constructor
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            variationsCount = getArguments().getInt(VARIATIONS_COUNT);
-        }
-
-        String [] options = new String [variationsCount+2];
-        for(int i = 0; i < variationsCount; i++) {
-            options[i] = getActivity().getString(R.string.option_set_variation) + i;
-        }
-        options[variationsCount] = getActivity().getString(R.string.option_create_new_variation);
-        options[variationsCount+1] = getActivity().getString(R.string.option_finish_set);
+        String [] options = new String [2];//at the start there are no variations
+        options[0] = getActivity().getString(R.string.option_create_new_variation);
+        options[1] = getActivity().getString(R.string.option_finish_set);
 
         mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_activated_1, options);
         setListAdapter(mAdapter);
@@ -76,7 +47,7 @@ public class FinishSetFragment extends ListFragment {
     }
 
     public void increaseVariationsCount() {
-        mAdapter.insert(getActivity().getString(R.string.option_set_variation) + variationsCount, variationsCount);
+        mAdapter.insert(getActivity().getString(R.string.option_set_variation) + " " + variationsCount, variationsCount);
         variationsCount++;
     }
 

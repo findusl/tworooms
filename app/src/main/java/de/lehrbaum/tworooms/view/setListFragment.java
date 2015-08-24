@@ -20,8 +20,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.DatabaseContentProvder;
-import de.lehrbaum.tworooms.view.dummy.DummyContent;
+import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 /**
  * A list fragment representing a list of sets. This fragment
@@ -68,8 +67,9 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
         mAdapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_list_item_activated_1, null,
                 new String[] {"name"}, new int[]{android.R.id.text1}, 0);
-
+        getLoaderManager().initLoader(0, null, this);
         setListAdapter(mAdapter);
+
         setHasOptionsMenu(true);
     }
 
@@ -108,8 +108,8 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvder.CONTENT_URI, "sets");
-        return new CursorLoader(getActivity(), uri, new String[]{"name"}, null /*TODO: count = people*/, null, null);
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "sets");
+        return new CursorLoader(getActivity(), uri, new String[]{"_id", "name"}, null /*TODO: count = people*/, null, null);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(DummyContent.ITEMS.get(position).id);
+        mCallbacks.onItemSelected((int) id);
     }
 
     @Override
@@ -188,7 +188,8 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
     public interface Callbacks {
         /**
          * Callback for when an item has been selected.
+         * @param id
          */
-        void onItemSelected(String id);
+        void onItemSelected(int id);
     }
 }

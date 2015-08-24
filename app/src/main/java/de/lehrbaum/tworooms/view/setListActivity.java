@@ -1,13 +1,18 @@
 package de.lehrbaum.tworooms.view;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 
 import de.lehrbaum.tworooms.R;
+import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 
 /**
@@ -56,6 +61,35 @@ public class SetListActivity extends Activity
                     .setActivateOnItemClick(true);
         }
 
+        setSyncUp();
+    }
+
+    private void setSyncUp() {
+        final String account = "TwoRoomsSync";
+        final String account_type = "de.lehrbaum";
+        final String authority = "de.lehrbaum.tworooms.database";
+
+        final Account newAccount = new Account(
+                account, account_type);
+        // Get an instance of the Android account manager
+        AccountManager accountManager =
+                (AccountManager) getSystemService(
+                        ACCOUNT_SERVICE);
+        accountManager.addAccountExplicitly(newAccount, null, null);
+
+        ContentResolver resolver = getContentResolver();
+        resolver.addPeriodicSync(newAccount, authority,
+                Bundle.EMPTY, /* 5 hours interval */5 * 60 * 60);
+
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "votes");
+
+        Runnable onChange = new Runnable() {
+            @Override
+            public void run() {
+                ContentResolver.requestSync(newAccount, authority, Bundle.EMPTY);
+            }
+        };
+        resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));
     }
 
     @Override
@@ -66,15 +100,16 @@ public class SetListActivity extends Activity
     /**
      * Callback method from {@link SetListFragment.Callbacks}
      * indicating that the item with the given ID was selected.
+     * @param id
      */
     @Override
-    public void onItemSelected(String id) {
+    public void onItemSelected(int id) {
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SetDetailFragment.ARG_ITEM_ID, id);
+            arguments.putInt(SetDetailFragment.ARG_SET_ID, id);
             Fragment fragment = new SetDetailFragment();
             fragment.setArguments(arguments);
             getFragmentManager().beginTransaction()
@@ -85,7 +120,7 @@ public class SetListActivity extends Activity
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, SetDetailActivity.class);
-            detailIntent.putExtra(SetDetailFragment.ARG_ITEM_ID, id);
+            detailIntent.putExtra(SetDetailFragment.ARG_SET_ID, id);
             startActivity(detailIntent);
         }
     }
