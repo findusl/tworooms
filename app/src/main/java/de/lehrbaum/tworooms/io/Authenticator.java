@@ -8,6 +8,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 public class Authenticator extends AbstractAccountAuthenticator {
+    public static final String ACCOUNT_TYPE = "de.lehrbaum.tworooms";
     // Simple constructor
     public Authenticator(Context context) {
         super(context);

@@ -66,6 +66,7 @@ public class DatabaseContentProvider extends ContentProvider {
         String table = uri.getLastPathSegment();
         SQLiteDatabase db = dbConnection.getReadableDatabase();
         Cursor c;
+        if(selection == null) selection = "";
         switch (selection) {
             case SET_ROLE_SELECTION:
                 /*

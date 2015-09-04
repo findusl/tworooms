@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 
 import de.lehrbaum.tworooms.R;
+import de.lehrbaum.tworooms.io.Authenticator;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 
@@ -66,7 +67,7 @@ public class SetListActivity extends Activity
 
     private void setSyncUp() {
         final String account = "TwoRoomsSync";
-        final String account_type = "de.lehrbaum";
+        final String account_type = Authenticator.ACCOUNT_TYPE;
         final String authority = "de.lehrbaum.tworooms.database";
 
         final Account newAccount = new Account(

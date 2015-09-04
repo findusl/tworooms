@@ -7,12 +7,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
 * Handle the transfer of data between a server and an
 * app, using the Android sync adapter framework.
 */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
+    private static final String TAG = SyncAdapter.class.getSimpleName();
     // Define a variable to contain a content resolver instance
     ContentResolver mContentResolver;
 
@@ -47,6 +49,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        Log.d(TAG, "on Perform Sync called");
         //TODO: connect to server, sync databases
     }
 }

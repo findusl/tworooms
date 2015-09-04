@@ -59,7 +59,7 @@ public class CreateSetActivity extends Activity
     @Override
     public void onListSubmitted(int position, long[] entries) {
         //show finish fragment
-        //TODO use two activities instead of one
+        //TODO use two activities instead of one. Use FLAG_ACTIVITY_CLEAR_TOP for return
         FragmentManager fm = getFragmentManager();
         if(mFinishFragment == null) {
             mFinishFragment = new FinishSetFragment();
