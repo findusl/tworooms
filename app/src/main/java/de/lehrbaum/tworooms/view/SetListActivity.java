@@ -93,11 +93,6 @@ public class SetListActivity extends Activity
         resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
-    }
-
     /**
      * Callback method from {@link SetListFragment.Callbacks}
      * indicating that the item with the given ID was selected.
