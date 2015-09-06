@@ -16,10 +16,10 @@ import de.lehrbaum.tworooms.R;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link FinishSetFragment.OnFragmentInteractionListener} interface
+ * {@link CreateSetFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class FinishSetFragment extends ListFragment {
+public class CreateSetFragment extends ListFragment {
     public static final String VARIATIONS_COUNT = "var_count";
 
     private OnFragmentInteractionListener mListener;

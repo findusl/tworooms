@@ -3,7 +3,6 @@ package de.lehrbaum.tworooms.view;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
@@ -19,7 +18,7 @@ import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 public class CreateSetActivityOld extends Activity
-        implements ChooseSetRoleFragment.Callbacks, FinishSetFragment.OnFragmentInteractionListener{
+        implements ChooseSetRoleFragment.Callbacks, CreateSetFragment.OnFragmentInteractionListener{
     private static final String TAG = ChooseSetRoleFragment.class.getSimpleName();
     private static final String FRAGMENT_FINISH_TAG = "finish";
 
@@ -54,7 +53,7 @@ public class CreateSetActivityOld extends Activity
         return super.onOptionsItemSelected(item);
     }
 
-    private FinishSetFragment mFinishFragment;
+    private CreateSetFragment mFinishFragment;
 
     @Override
     public void onListSubmitted(int position, long[] entries) {
@@ -62,7 +61,7 @@ public class CreateSetActivityOld extends Activity
         //TODO use two activities instead of one. Use FLAG_ACTIVITY_CLEAR_TOP for return
         FragmentManager fm = getFragmentManager();
         if(mFinishFragment == null) {
-            mFinishFragment = new FinishSetFragment();
+            mFinishFragment = new CreateSetFragment();
             getFragmentManager().beginTransaction().replace(R.id.fragmentContainer, mFinishFragment, FRAGMENT_FINISH_TAG).commit();
         } else {//TODO use intents
             fm.popBackStack(); //return to the existing finish fragment.

@@ -1,8 +1,14 @@
 package de.lehrbaum.tworooms.view;
 import android.app.*;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+
+import de.lehrbaum.tworooms.R;
 
 public class CreateSetActivity extends Activity
 {
+    private static final String TAG = CreateSetActivity.class.getSimpleName();
 	/**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -30,12 +36,6 @@ public class CreateSetActivity extends Activity
         }
     }
 
-    /**
-     * Callback method from {@link SetListFragment.Callbacks}
-     * indicating that the item with the given ID was selected.
-     * @param id
-     */
-    @Override
     public void onItemSelected(int id) {
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
