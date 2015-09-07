@@ -19,9 +19,9 @@ public class CreateSetActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.v(TAG, "on create");
-        setContentView(R.layout.activity_set_list);
+        setContentView(R.layout.activity_create_set);
 
-        if (findViewById(R.id.set_detail_container) != null) {
+        if (findViewById(R.id.choose_role_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-large and
             // res/values-sw600dp). If this view is present, then the
@@ -30,7 +30,7 @@ public class CreateSetActivity extends Activity
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
-            ((SetListFragment) getFragmentManager()
+            ((CreateSetFragment) getFragmentManager()
 				.findFragmentById(R.id.set_list))
 				.setActivateOnItemClick(true);
         }

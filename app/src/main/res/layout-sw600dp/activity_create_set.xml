@@ -13,14 +13,14 @@
     <!--
     This layout is a two-pane layout for the sets
     master/detail flow.
-    
+
     -->
 
-    <fragment android:id="@+id/set_list" android:name="de.lehrbaum.tworooms.view.SetListFragment"
+    <fragment android:id="@+id/create_set_fragment" android:name="de.lehrbaum.tworooms.view.CreateSetFragment"
         android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
-        tools:layout="@layout/fragment_set_list" />
+        tools:layout="@layout/fragment_create_set" />
 
-    <FrameLayout android:id="@+id/set_detail_container" android:layout_width="0dp"
+    <FrameLayout android:id="@+id/choose_role_container" android:layout_width="0dp"
         android:layout_height="match_parent" android:layout_weight="2" />
 
 </LinearLayout>
