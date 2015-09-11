@@ -8,34 +8,39 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import de.lehrbaum.tworooms.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link CreateSetFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- */
-public class CreateSetFragment extends ListFragment {
+
+public class CreateSetFragment extends ListFragment{
     public static final String VARIATIONS_COUNT = "var_count";
 
     private OnFragmentInteractionListener mListener;
 
-    private int variationsCount = 0;
+    private List<long []> variations;
+
+    private long [] setRoles;
 
     private ArrayAdapter<String> mAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String [] options = new String [2];//at the start there are no variations
-        options[0] = getActivity().getString(R.string.option_create_new_variation);
-        options[1] = getActivity().getString(R.string.option_finish_set);
 
-        mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_activated_1, options);
+        variations = new ArrayList<long[]>();
+        setRoles = new long [0];
+
+        mAdapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_list_item_activated_1,
+                new String []{});
         setListAdapter(mAdapter);
     }
 
@@ -43,29 +48,66 @@ public class CreateSetFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_finish_set, container, false);
+        View view = inflater.inflate(R.layout.fragment_create_set, container, false);
+        Button changeSet = (Button) view.findViewById(R.id.button_change_set);
+        changeSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onChangeSetClicked();
+            }
+        });
+        Button newVariation = (Button) view.findViewById(R.id.button_new_variation);
+        changeSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onAddVariationClicked();
+            }
+        });
+        Button save = (Button) view.findViewById(R.id.button_save_set);
+        changeSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSaveSetClicked();
+            }
+        });
+        return view;
     }
 
-    public void increaseVariationsCount() {
-        mAdapter.insert(getActivity().getString(R.string.option_set_variation) + " " + variationsCount, variationsCount);
-        variationsCount++;
+
+
+    public void addVariation(long [] variation) {
+        variations.add(variation);
+        mAdapter.add(getActivity().getString(R.string.option_set_variation) + " " + variations.size());
+    }
+
+    public void setRoles(int id, long [] selections) {
+        if(id == -1) {
+            setRoles = selections;
+        } else {
+            variations.set(id, selections);
+        }
+    }
+
+    protected void onChangeSetClicked() {
+        mListener.onChangeRoles(-1, setRoles);
+    }
+
+    protected void onAddVariationClicked() {
+        mListener.onCreateNewVariation(setRoles);
+    }
+
+    protected void onSaveSetClicked() {
+        TextView name = (TextView) getView().findViewById(R.id.name_text);
+        TextView desc = (TextView) getView().findViewById(R.id.desc_text);
+        mListener.onFinishSetClick(name.getText().toString(),
+                desc.getText().toString(),
+                setRoles,
+                variations.toArray(new long [variations.size()][]));
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        if(position < variationsCount) {
-            mListener.onVariationClicked(position);
-        } else {
-            switch (position-variationsCount) {
-                case 0:
-                    mListener.onCreateNewVariation();
-                    break;
-                case 1:
-                    TextView name = (TextView) getView().findViewById(R.id.editText);
-                    mListener.onFinishSetClick(name.getText().toString(), "");
-                    break;
-            }
-        }
+        mListener.onChangeRoles(position, variations.get(position));
     }
 	
     /**
@@ -76,8 +118,8 @@ public class CreateSetFragment extends ListFragment {
         // When setting CHOICE_MODE_SINGLE, ListView will automatically
         // give items the 'activated' state when touched.
         getListView().setChoiceMode(activateOnItemClick
-									? ListView.CHOICE_MODE_SINGLE
-									: ListView.CHOICE_MODE_NONE);
+                ? ListView.CHOICE_MODE_SINGLE
+                : ListView.CHOICE_MODE_NONE);
     }
 
     @Override
@@ -98,11 +140,15 @@ public class CreateSetFragment extends ListFragment {
     }
 
     public interface OnFragmentInteractionListener {
-        public void onVariationClicked(int i);
+        public void onChangeRoles(int id, long [] selections);
 
-        public void onCreateNewVariation();
+        /**
+         * This is called to select the roles of a new variation.
+         * @param setRoles The roles of the standard set. They can be preselected for the user.
+         */
+        public void onCreateNewVariation(long [] setRoles);
 
-        public void onFinishSetClick(String name, String description);
+        public void onFinishSetClick(String name, String description, long [] setRoles, long [][] variations);
     }
 
 }

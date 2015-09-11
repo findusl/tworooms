@@ -1,7 +1,6 @@
 package de.lehrbaum.tworooms.io;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -14,8 +13,24 @@ public class DatabaseContentProvider extends ContentProvider {
 
     protected LocalDatabaseConnection dbConnection;
 
-    public static final Uri CONTENT_URI = Uri.parse("content://de.lehrbaum.tworooms.database");
-    public static final String SET_ROLE_SELECTION = "set = ?";
+    public static final class Constants {
+
+        public static final Uri CONTENT_URI = Uri.parse("content://de.lehrbaum.tworooms.database");
+        public static final String SET_ROLE_SELECTION = "set = ?";
+        public static final String SETS_TABLE = "sets";
+        public static final String ROLE_COMBINATIONS_TABLE = "roleCombinations";
+        public static final String ROLES_TABLE = "roles";
+        public static final String TEAMS_TABLE = "teams";
+        public static final String SET_ROLES_TABLE = "set_roles";
+        public static final String NAME_COLUMN = "name";
+        public static final String COUNT_COLUMN = "count";
+        public static final String PARENT_COLUMN = "parent";
+        public static final String DESCRIPTION_COLUMN = "description";
+        public static final String ID_SET_COLUMN = "id_set";
+        public static final String ID_ROLE_COLUMN = "id_role";
+
+    }
+
 
     @Override
     public boolean onCreate() {
@@ -35,7 +50,7 @@ public class DatabaseContentProvider extends ContentProvider {
         String table = uri.getLastPathSegment();
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         long rowId = db.insert(table, null, values);
-        return Uri.withAppendedPath(CONTENT_URI, String.valueOf(rowId));
+        return Uri.withAppendedPath(Constants.CONTENT_URI, String.valueOf(rowId));
     }
 
     @Override
@@ -68,7 +83,7 @@ public class DatabaseContentProvider extends ContentProvider {
         Cursor c;
         if(selection == null) selection = "";
         switch (selection) {
-            case SET_ROLE_SELECTION:
+            case Constants.SET_ROLE_SELECTION:
                 /*
                  * This means selection of roles depending on a set id.
                  * For this we need to use joins which cannot be done with the normal query method.

@@ -1,0 +1,59 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="de.lehrbaum.tworooms.view.CreateSetFragment">
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="@string/hint_set_name"
+        android:ems="10"
+        android:id="@+id/name_text"
+        android:gravity="center" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:hint="@string/hint_set_desc"
+        android:ems="10"
+        android:id="@+id/desc_text"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_change_set"
+        android:id="@+id/button_change_set"
+        android:clickable="true"
+        android:enabled="true"
+        style="@android:style/Widget.DeviceDefault.Button.Borderless" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_new_variation"
+        android:id="@+id/button_new_variation"
+        android:clickable="true"
+        android:enabled="true"
+        style="@android:style/Widget.DeviceDefault.Button.Borderless" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_save_set"
+        android:id="@+id/button_save_set"
+        android:clickable="true"
+        android:enabled="true"
+        style="@android:style/Widget.DeviceDefault.Button.Borderless" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@android:id/list"
+        android:clickable="true" />
+
+</LinearLayout>

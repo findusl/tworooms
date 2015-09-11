@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.Authenticator;
@@ -82,7 +81,7 @@ public class SetListActivity extends Activity
         resolver.addPeriodicSync(newAccount, authority,
                 Bundle.EMPTY, /* 5 hours interval */5 * 60 * 60);
 
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "votes");
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "votes");
 
         Runnable onChange = new Runnable() {
             @Override

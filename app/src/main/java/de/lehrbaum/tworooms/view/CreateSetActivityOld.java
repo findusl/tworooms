@@ -18,8 +18,8 @@ import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 public class CreateSetActivityOld extends Activity
-        implements ChooseSetRoleFragment.Callbacks, CreateSetFragment.OnFragmentInteractionListener{
-    private static final String TAG = ChooseSetRoleFragment.class.getSimpleName();
+        implements ChooseRoleFragment.Callbacks, CreateSetFragment.OnFragmentInteractionListener{
+    private static final String TAG = ChooseRoleFragment.class.getSimpleName();
     private static final String FRAGMENT_FINISH_TAG = "finish";
 
     //TODO use one variable for standard selection
@@ -29,7 +29,7 @@ public class CreateSetActivityOld extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_set);
-        Fragment f = new ChooseSetRoleFragment();
+        Fragment f = new ChooseRoleFragment();
         getFragmentManager().beginTransaction().add(R.id.fragmentContainer, f).commit();
         mVariations = new ArrayList<long []>();
     }
@@ -78,19 +78,19 @@ public class CreateSetActivityOld extends Activity
 
     @Override
     public void onVariationClicked(int i) {
-        Fragment f = ChooseSetRoleFragment.newInstance(i, mVariations.get(i));
+        Fragment f = ChooseRoleFragment.newInstance(i, mVariations.get(i));
         getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fragmentContainer, f).commit();
     }
 
     @Override
     public void onCreateNewVariation() {
-        Fragment f = ChooseSetRoleFragment.newInstance();
+        Fragment f = ChooseRoleFragment.newInstance();
         getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fragmentContainer, f).commit();
     }
 
     @Override
     public void onFinishSetClick(String name, String description) {
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "roles");
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "roles");
         ContentValues values = new ContentValues(2);
         values.put("name", name);
         values.put("description", description);
@@ -113,7 +113,7 @@ public class CreateSetActivityOld extends Activity
 
     private void insertRoleSetReferences(long setId, long[] selection) {
         for(long l : selection) {
-            Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "set_roles");
+            Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "set_roles");
             ContentValues values = new ContentValues(1);
             values.put("set_id", setId);
             values.put("role_id", l);

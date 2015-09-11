@@ -1,8 +1,6 @@
 package de.lehrbaum.tworooms.view;
 
 import android.app.ListFragment;
-import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -65,7 +63,7 @@ public class SetDetailFragment extends ListFragment implements LoaderManager.Loa
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "sets");
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "sets");
         Cursor c = getActivity().getContentResolver().query(uri, new String[]{"name", "description"},
                 "_id = ?", new String[]{Integer.toString(setId)}, null);
 
@@ -80,10 +78,10 @@ public class SetDetailFragment extends ListFragment implements LoaderManager.Loa
 
     @Override
     public Loader<Cursor> onCreateLoader(int setId, Bundle bundle) {
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "roles");
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "roles");
         return new CursorLoader(getActivity(), uri,
                 new String[]{"_id", "name"},
-                DatabaseContentProvider.SET_ROLE_SELECTION,
+                DatabaseContentProvider.Constants.SET_ROLE_SELECTION,
                 new String[]{Integer.toString(setId)},
                 null);
     }

@@ -21,6 +21,7 @@ import android.widget.SimpleCursorAdapter;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 
 /**
  * A list fragment representing a list of sets. This fragment
@@ -108,7 +109,7 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.CONTENT_URI, "sets");
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
         return new CursorLoader(getActivity(), uri, new String[]{"_id", "name"}, null /*TODO: count = people*/, null, null);
     }
 

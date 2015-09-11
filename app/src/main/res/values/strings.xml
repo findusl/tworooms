@@ -11,5 +11,8 @@
     <string name="option_set_variation">Set variation </string>
     <string name="option_create_new_variation">Create new variation</string>
     <string name="hint_set_name">Name of the set</string>
-    <string name="option_finish_set">Finish and save</string>
+    <string name="button_save_set">Finish and save</string>
+    <string name="hint_set_desc">Set description</string>
+    <string name="button_change_set">Change Set</string>
+    <string name="button_new_variation">Create new Variation</string>
 </resources>

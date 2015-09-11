@@ -17,12 +17,12 @@ import de.lehrbaum.tworooms.R;
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link SetDetailFragment}.
  */
-public class SetDetailActivity extends Activity {
+public class ChooseRoleActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_set_detail);
+        setContentView(R.layout.activity_choose_role);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
