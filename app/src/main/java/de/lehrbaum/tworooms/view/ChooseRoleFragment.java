@@ -29,11 +29,6 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
 
     private CursorAdapter mAdapter;
 
-    public static ChooseRoleFragment newInstance() {
-        ChooseRoleFragment fragment = new ChooseRoleFragment();
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

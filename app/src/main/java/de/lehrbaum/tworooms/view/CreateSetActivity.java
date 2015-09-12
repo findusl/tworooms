@@ -78,6 +78,10 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
 
     @Override
     public void onCreateNewVariation(long[] setRoles) {
+		//not so nice. The ids should be fully managed 
+		//by the fragment or not at all. But will have to change anyway
+		//when name and description for variations become possible so i
+		//leave it for now
         onChangeRoles(-2, setRoles);
     }
 
