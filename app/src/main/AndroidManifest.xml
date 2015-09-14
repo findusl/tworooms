@@ -36,6 +36,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".view.SetListActivity" />
         </activity>
+        <activity
+            android:name=".view.ChooseRoleActivity"
+            android:label="@string/title_activity_choose_role"
+            android:parentActivityName=".view.ChooseRoleActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".view.CreateSetActivity" />
+        </activity>
 
         <provider
             android:name=".io.DatabaseContentProvider"

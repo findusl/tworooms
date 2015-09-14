@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,8 @@ import de.lehrbaum.tworooms.io.DatabaseContentProvider;
  * on handsets.
  */
 public class SetDetailFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final String TAG = SetDetailFragment.class.getSimpleName();
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -38,9 +41,9 @@ public class SetDetailFragment extends ListFragment implements LoaderManager.Loa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setId = getArguments().getInt(ARG_SET_ID, -1);
-        if(setId < 0) {
-            throw new IllegalArgumentException("Need item id >= 0 to display item details.");
+        setId = getArguments().getInt(ARG_SET_ID, Integer.MIN_VALUE);
+        if(setId == Integer.MIN_VALUE) {
+            throw new IllegalArgumentException("Need item id to display item details.");
         }
 
         mAdapter = new SimpleCursorAdapter(getActivity(),
@@ -66,6 +69,7 @@ public class SetDetailFragment extends ListFragment implements LoaderManager.Loa
         Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "sets");
         Cursor c = getActivity().getContentResolver().query(uri, new String[]{"name", "description"},
                 "_id = ?", new String[]{Integer.toString(setId)}, null);
+        c.moveToFirst();
 
         String name = c.getString(0);
         TextView nameView = (TextView) view.findViewById(R.id.name_view);
@@ -88,6 +92,7 @@ public class SetDetailFragment extends ListFragment implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(TAG, "Cursor count: " + data.getCount());
         mAdapter.swapCursor(data);
     }
 

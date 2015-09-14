@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import de.lehrbaum.tworooms.R;
 
 
 public class CreateSetFragment extends ListFragment{
+    private static final String TAG = CreateSetFragment.class.getSimpleName();
     public static final String VARIATIONS_COUNT = "var_count";
 
     private OnFragmentInteractionListener mListener;
@@ -36,7 +38,7 @@ public class CreateSetFragment extends ListFragment{
         super.onCreate(savedInstanceState);
 
         variations = new ArrayList<long[]>();
-        setRoles = new long [0];
+        setRoles = new long [] {7, 8};
 
         mAdapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_list_item_activated_1,
@@ -57,14 +59,14 @@ public class CreateSetFragment extends ListFragment{
             }
         });
         Button newVariation = (Button) view.findViewById(R.id.button_new_variation);
-        changeSet.setOnClickListener(new View.OnClickListener() {
+        newVariation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onAddVariationClicked();
             }
         });
         Button save = (Button) view.findViewById(R.id.button_save_set);
-        changeSet.setOnClickListener(new View.OnClickListener() {
+        save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onSaveSetClicked();
@@ -81,6 +83,7 @@ public class CreateSetFragment extends ListFragment{
     }
 
     public void setRoles(int id, long [] selections) {
+        Log.d(TAG, "Set roles called");
         if(id == -1) {
             setRoles = selections;
         } else {

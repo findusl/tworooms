@@ -70,7 +70,7 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
-            Intent detailIntent = new Intent(this, SetDetailActivity.class);
+            Intent detailIntent = new Intent(this, ChooseRoleActivity.class);
             detailIntent.putExtra(ChooseRoleFragment.SELECTION_INDIZES, selections);
             startActivityForResult(detailIntent, id);
         }
@@ -88,6 +88,7 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
     @Override
     protected final void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK) {
+            Log.d(TAG, "Result = ok");
             long [] selection = data.getLongArrayExtra(ChooseRoleFragment.SELECTION_INDIZES);
             if(requestCode == -2)
                 mFragment.addVariation(selection);
@@ -98,17 +99,24 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
 
     @Override
     public void onFinishSetClick(String name, String description, long[] setRoles, long[][] variations) {
+        Log.d(TAG, "Finish Set clicked");
+        if(setRoles == null || setRoles.length == 0) {
+            setResult(RESULT_CANCELED);
+            finish();
+            return;
+        }
         Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
         ArrayList<ContentValues> roleInserts = new ArrayList<ContentValues>((setRoles.length)*(variations.length + 1));
         ContentValues values = new ContentValues(3);
         values.put(NAME_COLUMN, name);
         values.put(DESCRIPTION_COLUMN, description);
         values.put(COUNT_COLUMN, setRoles.length);
-        Uri parent = getContentResolver().insert(uri, values);
+        Uri parentUri = getContentResolver().insert(uri, values);
+        long parent = Long.parseLong(parentUri.getLastPathSegment());
         Log.d(TAG, "Parent: " + parent);
         for(long l : setRoles) {
             values = new ContentValues(2);
-            values.put(ID_SET_COLUMN, parent.toString());
+            values.put(ID_SET_COLUMN, parent);
             values.put(ID_ROLE_COLUMN, l);
             roleInserts.add(values);
         }
@@ -117,16 +125,17 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
             values.put(NAME_COLUMN, name);
             values.put(DESCRIPTION_COLUMN, description);
             values.put(COUNT_COLUMN, setRoles.length);
-            values.put(PARENT_COLUMN, parent.toString());
-            Uri current = getContentResolver().insert(uri, values);
-
+            values.put(PARENT_COLUMN, parent);
+            Uri currentUri = getContentResolver().insert(uri, values);
+            long current = Long.parseLong(currentUri.getLastPathSegment());
             for(long l : variation) {
                 values = new ContentValues(2);
-                values.put(ID_SET_COLUMN, current.toString());
+                values.put(ID_SET_COLUMN, current);
                 values.put(ID_ROLE_COLUMN, l);
                 roleInserts.add(values);
             }
         }
+        uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SET_ROLES_TABLE);
         ContentValues [] roleInsertsArray = roleInserts.toArray(new ContentValues[roleInserts.size()]);
         getContentResolver().bulkInsert(uri, roleInsertsArray);
         Intent result = new Intent();

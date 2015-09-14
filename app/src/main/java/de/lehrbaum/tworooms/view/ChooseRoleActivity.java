@@ -3,12 +3,17 @@ package de.lehrbaum.tworooms.view;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+
+import java.util.Arrays;
 
 import de.lehrbaum.tworooms.R;
 
 
 public class ChooseRoleActivity extends Activity {
+
+    private static final String TAG = ChooseRoleActivity.class.getSimpleName();
 
 	private ChooseRoleFragment mFragment;
 	
@@ -51,6 +56,7 @@ public class ChooseRoleActivity extends Activity {
 	protected void onStop()
 	{
 		super.onStop();
+        Log.d(TAG, "On Stop passing Intent " + Arrays.toString(mFragment.getSelection()));
 		Intent intent = new Intent();
 		intent.putExtra(ChooseRoleFragment.SELECTION_INDIZES, mFragment.getSelection());
 		setResult(RESULT_OK, intent);
