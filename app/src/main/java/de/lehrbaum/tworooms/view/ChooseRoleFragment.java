@@ -22,6 +22,7 @@ import java.util.HashSet;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import android.widget.AdapterView.*;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -32,26 +33,37 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
     public static final String SELECTION_INDIZES = "selection_ind";
 
     private CursorAdapter mAdapter;
+	
+	private long [] mStartSelections;
 
     private long [] mSelections;
+	
+	private boolean hasChanged;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        long [] selections;
         if (getArguments() != null) {
-            mSelections = getArguments().getLongArray(SELECTION_INDIZES);
+            mStartSelections = getArguments().getLongArray(SELECTION_INDIZES);
             Log.i(TAG, "Selection with indizes: " + Arrays.toString(mSelections));
         }
         else {
-            mSelections = new long[0];
+            mStartSelections = new long[0];
         }
+		mSelections = mStartSelections;
 
-        //TODO: search for premade loading example because list takes time
+		//Add item @id/android:empty to display while list is empty
+		
         mAdapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_list_item_activated_1, null,
                 new String[] {"name"}, new int[]{android.R.id.text1}, 0);
         setListAdapter(mAdapter);
+		
+		/*getListView().setOnItemSelectedListener(new OnItemSelectedListener() {
+			void onItemSelected(arg0, arg1, arg2, arg3) {
+				
+			}
+		});*/
 
         getLoaderManager().initLoader(0, null, this);
 
@@ -62,6 +74,10 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_choose_roles, container, false);
     }
+	
+	public boolean hasChanged() {
+		return !Arrays.equals(mSelections, mStartSelections);
+	}
 
     public long [] getSelection () {
         return getListView().getCheckedItemIds();

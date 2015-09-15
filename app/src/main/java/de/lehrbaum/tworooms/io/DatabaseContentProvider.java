@@ -89,7 +89,6 @@ public class DatabaseContentProvider extends ContentProvider {
                  * For this we need to use joins which cannot be done with the normal query method.
                  * Therefore we use raw query.
                  */
-                String setId = selectionArgs[0];
                 StringBuilder columns;
                 if(projection != null) {
                     columns = new StringBuilder();
@@ -104,10 +103,9 @@ public class DatabaseContentProvider extends ContentProvider {
                  */
                 c = db.rawQuery("SELECT _id, name, description " +
                                 "FROM roles JOIN set_roles ON _id = id_role " +
-                                "WHERE id_set = ? or id_set = " +
-                                "(SELECT parent FROM sets s WHERE s._id = ?)" +
+                                "WHERE id_set = ? " +
                                 (sortOrder == null ? "" : " ORDER BY " + sortOrder),
-                        new String[]{setId, setId});
+                        selectionArgs);
                 break;
             default:
                 c = db.query(table, projection, selection, selectionArgs, null, null, sortOrder);

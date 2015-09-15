@@ -56,10 +56,13 @@ public class ChooseRoleActivity extends Activity {
 	protected void onStop()
 	{
 		super.onStop();
-        Log.d(TAG, "On Stop passing Intent " + Arrays.toString(mFragment.getSelection()));
-		Intent intent = new Intent();
-		intent.putExtra(ChooseRoleFragment.SELECTION_INDIZES, mFragment.getSelection());
-		setResult(RESULT_OK, intent);
+		if(mFragment.hasChanged()) {
+        	Log.d(TAG, "On Stop passing Intent " + Arrays.toString(mFragment.getSelection()));
+			Intent intent = new Intent();
+			intent.putExtra(ChooseRoleFragment.SELECTION_INDIZES, mFragment.getSelection());
+			setResult(RESULT_OK, intent);
+		} else
+			setResult(RESULT_CANCELED);
 	}
 	
 	

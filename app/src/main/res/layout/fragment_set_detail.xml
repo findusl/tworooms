@@ -16,14 +16,14 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/desc_view"
         android:padding="@dimen/activity_horizontal_margin"
-        android:textIsSelectable="true" />
+        android:id="@+id/desc_view"
+        android:textIsSelectable="true"/>
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:id="@android:id/list"
-        android:clickable="true" />
+        android:clickable="true"/>
 
 </LinearLayout>

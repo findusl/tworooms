@@ -22,6 +22,9 @@ import android.widget.SimpleCursorAdapter;
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import android.view.ContextMenu.*;
+import android.view.*;
+import android.widget.AdapterView.*;
 
 /**
  * A list fragment representing a list of sets. This fragment
@@ -88,6 +91,7 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
+		//registerForContextMenu(getListView()); make id for creator
     }
 
     @Override
@@ -106,6 +110,27 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
         }
         return super.onOptionsItemSelected(item);
     }
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
+	{
+		if(v.getId() == android.R.id.list) {
+			MenuInflater inflater = getActivity().getMenuInflater();
+			
+		}
+		super.onCreateContextMenu(menu, v, menuInfo);
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+			case R.id.action_delete:
+				AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+				
+				return true;
+		}
+		return super.onContextItemSelected(item);
+	}
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

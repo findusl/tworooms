@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import android.widget.*;
 
 public class CreateSetActivity extends Activity implements CreateSetFragment.OnFragmentInteractionListener
 {
@@ -42,21 +43,30 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
     private static final String SELECTION_ID = "sel_id";
     private static final String CHOOSE_ROLE_TAG = "crt";
 
+	@Override
+	public void removeOldVariation()//TODO rename
+	{
+		if(mTwoPane) {
+		//first retrieve the old fragment
+		Fragment old = getFragmentManager().findFragmentByTag(CHOOSE_ROLE_TAG);
+		if(old != null && old instanceof ChooseRoleFragment) {
+			ChooseRoleFragment fragment = (ChooseRoleFragment) old;
+			if(!fragment.hasChanged())
+				return;
+			Bundle arguments = old.getArguments();
+			int old_id = arguments.getInt(SELECTION_ID);
+			long [] old_selection = fragment.getSelection();
+			if(old_id == -2)
+				mFragment.addVariation(old_selection);
+			else
+				mFragment.setRoles(old_id, old_selection);
+		}
+		}
+	}
+
     @Override
     public void onChangeRoles(int id, long[] selections) {
         if (mTwoPane) {
-            //first retrieve the old fragment
-            Fragment old = getFragmentManager().findFragmentByTag(CHOOSE_ROLE_TAG);
-            if(old != null && old instanceof ChooseRoleFragment) {
-                ChooseRoleFragment fragment = (ChooseRoleFragment) old;
-                Bundle arguments = old.getArguments();
-                int old_id = arguments.getInt(SELECTION_ID);
-                long [] old_selection = fragment.getSelection();
-                if(old_id == -2)
-                    mFragment.addVariation(old_selection);
-                else
-                    mFragment.setRoles(old_id, old_selection);
-            }
             //put new fragment
             Bundle arguments = new Bundle();
             arguments.putLongArray(ChooseRoleFragment.SELECTION_INDIZES, selections);
@@ -98,11 +108,15 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
     }
 
     @Override
-    public void onFinishSetClick(String name, String description, long[] setRoles, long[][] variations) {
+    public void onFinishSetClick(String name, String description, long[] setRoles, 
+								String [] variationNames, long[][] variations) {
         Log.d(TAG, "Finish Set clicked");
+		if(name == null || name.length() == 0) {
+			Toast.makeText(this, R.string.error_set_name, Toast.LENGTH_SHORT).show();
+			return;
+		}
         if(setRoles == null || setRoles.length == 0) {
-            setResult(RESULT_CANCELED);
-            finish();
+            Toast.makeText(this, R.string.error_set_roles, Toast.LENGTH_SHORT).show();
             return;
         }
         Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
@@ -120,14 +134,15 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
             values.put(ID_ROLE_COLUMN, l);
             roleInserts.add(values);
         }
-        for(long [] variation : variations) {
+	   for(int i = 0; i < variations.length; i++) {
+		   long [] variation = variations[i];
             values = new ContentValues(4);
-            values.put(NAME_COLUMN, name);
+            values.put(NAME_COLUMN, variationNames[i]);
             values.put(DESCRIPTION_COLUMN, description);
-            values.put(COUNT_COLUMN, setRoles.length);
+            values.put(COUNT_COLUMN, variation.length);
             values.put(PARENT_COLUMN, parent);
             Uri currentUri = getContentResolver().insert(uri, values);
-            long current = Long.parseLong(currentUri.getLastPathSegment());
+		    long current = Long.parseLong(currentUri.getLastPathSegment());
             for(long l : variation) {
                 values = new ContentValues(2);
                 values.put(ID_SET_COLUMN, current);
