@@ -2,7 +2,6 @@ package de.lehrbaum.tworooms.view;
 
 import android.app.ListFragment;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -18,11 +17,9 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
-import android.widget.AdapterView.*;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -36,21 +33,16 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
 	
 	private long [] mStartSelections;
 
-    private long [] mSelections;
-	
-	private boolean hasChanged;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mStartSelections = getArguments().getLongArray(SELECTION_INDIZES);
-            Log.i(TAG, "Selection with indizes: " + Arrays.toString(mSelections));
+            Log.i(TAG, "Selection with indizes: " + Arrays.toString(mStartSelections));
         }
         else {
             mStartSelections = new long[0];
         }
-		mSelections = mStartSelections;
 
 		//Add item @id/android:empty to display while list is empty
 		
@@ -74,21 +66,13 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_choose_roles, container, false);
     }
-	
-	public boolean hasChanged() {
-		return !Arrays.equals(mSelections, mStartSelections);
-	}
 
     public long [] getSelection () {
-        return getListView().getCheckedItemIds();
-        /*long [] selected = getListView().getCheckedItemIds();
-        Cursor c = mAdapter.getCursor();
-        //replace the array ids with the ids from the database.
-        for(int i = 0; i < selected.length; i++) {
-            c.moveToPosition((int) selected[i]);
-            selected[i] = c.getLong(0);
-        }
-        return selected;*/
+        long [] selections = getListView().getCheckedItemIds();;
+        if(Arrays.equals(selections, mStartSelections))
+            return null;
+        else
+            return selections;
     }
 
     @Override
@@ -99,9 +83,9 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(new SortedCursor(data, mSelections));
+        mAdapter.swapCursor(new SortedCursor(data, mStartSelections));
         ListView lv = getListView();
-        for(int i = 0; i < mSelections.length; i++) {
+        for(int i = 0; i < mStartSelections.length; i++) {
             lv.setItemChecked(i, true);
         }
     }
@@ -113,7 +97,7 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
 
     protected class SortedCursor extends CursorWrapper {
 
-        protected int [] positionMapping;
+        protected int [] mPositionMapping;
 
         /**
          * Creates a new sorted cursor that sorts specific elements to the top of the cursor.
@@ -125,22 +109,22 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
             super(cursor);
             Arrays.sort(selections);
             int size = cursor.getCount();
-            positionMapping = new int [size];
+            mPositionMapping = new int [size];
             int checkedMappings = 0;
             int unCheckedMappings = selections.length;
             cursor.moveToFirst();
             for (int i = 0; i < size; cursor.moveToNext()) {
                 long id = cursor.getLong(0);
                 if (Arrays.binarySearch(selections, id) >= 0)
-                    positionMapping[checkedMappings++] = i++;
+                    mPositionMapping[checkedMappings++] = i++;
                 else {
                     if(unCheckedMappings >= size) {
                         //this should not happen, but it can happen if some selection is simply no longer in the database.
                         //then i map to the next position underneath selections.length
                         Log.e(TAG, "The unchecked mappings extended size. Selections: " + Arrays.toString(selections));
-                        positionMapping[selections.length - (++unCheckedMappings - size)] = i++;
+                        mPositionMapping[selections.length - (++unCheckedMappings - size)] = i++;
                     } else
-                        positionMapping[unCheckedMappings++] = i++;
+                        mPositionMapping[unCheckedMappings++] = i++;
                 }
 
             }
@@ -149,56 +133,17 @@ public class ChooseRoleFragment extends ListFragment implements LoaderManager.Lo
 
         @Override
         public boolean moveToPosition(int position) {
-            return super.moveToPosition(positionMapping[position]);
+            return super.moveToPosition(mPositionMapping[position]);
         }
 
         @Override
         public int getPosition() {
             int actualPos = super.getPosition();
-            for(int i = 0; i < positionMapping.length; i++) {
-                if(positionMapping[i] == actualPos)
+            for(int i = 0; i < mPositionMapping.length; i++) {
+                if(mPositionMapping[i] == actualPos)
                     return i;
             }
             throw new UnsupportedOperationException("Cannot find current position in position mapping");
         }
     }
-
-    /*protected class SortedCursorAdapter extends SimpleCursorAdapter {
-
-        protected int [] positionMapping;
-
-        public SortedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
-            super(context, layout, c, from, to, flags);
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return super.getItem(positionMapping[position]);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return super.getItemId(positionMapping[position]);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            return super.getView(positionMapping[position], convertView, parent);
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            return super.getDropDownView(positionMapping[position], convertView, parent);
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return super.isEnabled(positionMapping[position]);
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return super.getItemViewType(positionMapping[position]);
-        }
-    }*/
 }

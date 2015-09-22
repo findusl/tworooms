@@ -36,7 +36,7 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
 
         if (findViewById(R.id.choose_role_container) != null) {
             mTwoPane = true;
-            mFragment.setActivateOnItemClick(true);
+            mFragment.setActivateOnItemClick();
         }
     }
 
@@ -47,20 +47,20 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
 	public void removeOldVariation()//TODO rename
 	{
 		if(mTwoPane) {
-		//first retrieve the old fragment
-		Fragment old = getFragmentManager().findFragmentByTag(CHOOSE_ROLE_TAG);
-		if(old != null && old instanceof ChooseRoleFragment) {
-			ChooseRoleFragment fragment = (ChooseRoleFragment) old;
-			if(!fragment.hasChanged())
-				return;
-			Bundle arguments = old.getArguments();
-			int old_id = arguments.getInt(SELECTION_ID);
-			long [] old_selection = fragment.getSelection();
-			if(old_id == -2)
-				mFragment.addVariation(old_selection);
-			else
-				mFragment.setRoles(old_id, old_selection);
-		}
+            //first retrieve the old fragment
+            Fragment old = getFragmentManager().findFragmentByTag(CHOOSE_ROLE_TAG);
+            if(old != null && old instanceof ChooseRoleFragment) {
+                ChooseRoleFragment fragment = (ChooseRoleFragment) old;
+                if(!fragment.hasChanged())
+                    return;
+                Bundle arguments = old.getArguments();
+                int old_id = arguments.getInt(SELECTION_ID);
+                long [] old_selection = fragment.getSelection();
+                if(old_id == -2)
+                    mFragment.addVariation(old_selection);
+                else
+                    mFragment.setRoles(old_id, old_selection);
+            }
 		}
 	}
 
@@ -120,7 +120,7 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
             return;
         }
         Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
-        ArrayList<ContentValues> roleInserts = new ArrayList<ContentValues>((setRoles.length)*(variations.length + 1));
+        ArrayList<ContentValues> roleInserts = new ArrayList<>((setRoles.length)*(variations.length + 1));
         ContentValues values = new ContentValues(3);
         values.put(NAME_COLUMN, name);
         values.put(DESCRIPTION_COLUMN, description);

@@ -5,7 +5,7 @@ import android.content.Context;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 /**
- * Created by Sebastian on 23.05.2015.
+ * This class uses the @link{SQLiteAssetHelper} class to read a database file into the database.
  */
 public class LocalDatabaseConnection extends SQLiteAssetHelper{
 
@@ -16,6 +16,4 @@ public class LocalDatabaseConnection extends SQLiteAssetHelper{
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         setForcedUpgrade();
     }
-
-    //TODO: remove autoincrement
 }

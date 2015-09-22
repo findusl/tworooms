@@ -3,7 +3,6 @@ package de.lehrbaum.tworooms.view;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,18 +12,14 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import de.lehrbaum.tworooms.R;
-import org.xml.sax.helpers.*;
-import android.view.ContextMenu.*;
+
 import android.view.*;
 import android.widget.AdapterView.*;
 import android.app.*;
-import android.view.inputmethod.*;
 import android.widget.*;
 import android.text.*;
 import android.content.*;
@@ -37,14 +32,14 @@ public class CreateSetFragment extends ListFragment{
     private OnFragmentInteractionListener mListener;
 	
 	//TODO: rename all variables with m at start
-	private TextView nameView;
+	private TextView mNameView;
 
-    private List<long []> variations;
+    private List<long []> mVariations;
 	/** Need extra counter in case of deleting variations. */
-	private int autoIncrementVariation = 0;
-	private List<String> variationNames;
+	private int mAutoIncrementVariation = 0;
+	private List<String> mVariationNames;
 
-    private long [] setRoles;
+    private long [] mSetRoles;
 
     private ArrayAdapter<String> mAdapter;
 
@@ -52,11 +47,11 @@ public class CreateSetFragment extends ListFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        variations = new ArrayList<long[]>();
-		variationNames = new ArrayList<String>();
-        setRoles = new long [] {7, 8};
+        mVariations = new ArrayList<>();
+		mVariationNames = new ArrayList<>();
+        mSetRoles = new long [] {7, 8};
 
-        mAdapter = new ArrayAdapter<String>(getActivity(),
+        mAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 new ArrayList<String>());
         setListAdapter(mAdapter);
@@ -67,7 +62,7 @@ public class CreateSetFragment extends ListFragment{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_create_set, container, false);
-        nameView = (TextView) view.findViewById(R.id.name_text);
+        mNameView = (TextView) view.findViewById(R.id.name_text);
 		
 		Button changeSet = (Button) view.findViewById(R.id.button_change_set);
         changeSet.setOnClickListener(new View.OnClickListener() {
@@ -122,8 +117,8 @@ public class CreateSetFragment extends ListFragment{
 			switch(item.getItemId()) {
 			case R.id.action_delete:
 				mAdapter.remove(mAdapter.getItem(menuInfo.position));
-				variations.remove(menuInfo.position);
-				variationNames.remove(menuInfo.position);
+				mVariations.remove(menuInfo.position);
+				mVariationNames.remove(menuInfo.position);
 				return true;
 			case R.id.action_rename:
 				changeName(menuInfo.position);
@@ -147,7 +142,7 @@ public class CreateSetFragment extends ListFragment{
 		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() { 
     		@Override
     		public void onClick(DialogInterface dialog, int which) {
-        		variationNames.set(position, input.getText().toString());
+        		mVariationNames.set(position, input.getText().toString());
     		}
 		});
 		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -161,62 +156,60 @@ public class CreateSetFragment extends ListFragment{
 	}
 
     public void addVariation(long [] variation) {
-        variations.add(variation);
-		String name = nameView.getText().toString();
-		if(name == null || name.length() == 0)
+        mVariations.add(variation);
+		String name = mNameView.getText().toString();
+		if(name.length() == 0)
 			name = getActivity().getString(R.string.option_set_variation);
-		name +=  " " + autoIncrementVariation++;
-		variationNames.add(name);
+		name +=  " " + mAutoIncrementVariation++;
+		mVariationNames.add(name);
         mAdapter.add(name);
     }
 
     public void setRoles(int id, long [] selections) {
         Log.d(TAG, "Set roles called");
         if(id == -1) {
-            setRoles = selections;
+            mSetRoles = selections;
         } else {
-            variations.set(id, selections);
+            mVariations.set(id, selections);
         }
     }
 
     protected void onChangeSetClicked() {
 		mListener.removeOldVariation();
-		if(variations.size() != 0)
+		if(mVariations.size() != 0)
 			Toast.makeText(getActivity(), R.string.warning_change_set, Toast.LENGTH_SHORT).show();
-        mListener.onChangeRoles(-1, setRoles);
+        mListener.onChangeRoles(-1, mSetRoles);
     }
 
     protected void onAddVariationClicked() {
 		mListener.removeOldVariation();
-        mListener.onCreateNewVariation(setRoles);
+        mListener.onCreateNewVariation(mSetRoles);
     }
 
     protected void onSaveSetClicked() {
 		mListener.removeOldVariation();
         TextView desc = (TextView) getView().findViewById(R.id.desc_text);
-        mListener.onFinishSetClick(nameView.getText().toString(),
+        mListener.onFinishSetClick(mNameView.getText().toString(),
                 desc.getText().toString(),
-                setRoles,
-				variationNames.toArray(new String[variationNames.size()]),
-                variations.toArray(new long [variations.size()][]));
+                mSetRoles,
+                mVariationNames.toArray(new String[mVariationNames.size()]),
+                mVariations.toArray(new long[mVariations.size()][]));
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
 		mListener.removeOldVariation();
-        mListener.onChangeRoles(position, variations.get(position));
+        mListener.onChangeRoles(position, mVariations.get(position));
     }
 	
     /**
      * Turns on activate-on-click mode. When this mode is on, list items will be
      * given the 'activated' state when touched.
      */
-    public void setActivateOnItemClick(boolean activateOnItemClick) {
+    public void setActivateOnItemClick() {
         // When setting CHOICE_MODE_SINGLE, ListView will automatically
         // give items the 'activated' state when touched.
-        getListView().setChoiceMode(activateOnItemClick
-                ? ListView.CHOICE_MODE_SINGLE
-                : ListView.CHOICE_MODE_NONE);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
 
     @Override
@@ -237,20 +230,20 @@ public class CreateSetFragment extends ListFragment{
     }
 
     public interface OnFragmentInteractionListener {
-        public void onChangeRoles(int id, long [] selections);
+        void onChangeRoles(int id, long [] selections);
 
         /**
          * This is called to select the roles of a new variation.
          * @param setRoles The roles of the standard set. They can be preselected for the user.
          */
-        public void onCreateNewVariation(long [] setRoles);
+        void onCreateNewVariation(long [] setRoles);
 		
 		/**
 		 * Removes any old pending choose role operations in two pane mode.
 		 */
-		public void removeOldVariation();
+		void removeOldVariation();
 
-        public void onFinishSetClick(String name, String description, long [] setRoles,
+        void onFinishSetClick(String name, String description, long [] setRoles,
 							String [] variationNames, long [][] variations);
     }
 

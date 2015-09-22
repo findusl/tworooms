@@ -60,8 +60,7 @@ public class DatabaseContentProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri, null);
         String table = uri.getLastPathSegment();
         SQLiteDatabase db = dbConnection.getWritableDatabase();
-        int count = db.update(table, values, selection, selectionArgs);
-        return count;
+        return db.update(table, values, selection, selectionArgs);
     }
 
     @Override
@@ -70,8 +69,7 @@ public class DatabaseContentProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri, null);
         String table = uri.getLastPathSegment();
         SQLiteDatabase db = dbConnection.getWritableDatabase();
-        int count = db.delete(table, selection, selectionArgs);
-        return count;
+        return db.delete(table, selection, selectionArgs);
     }
 
     @Override
@@ -93,7 +91,7 @@ public class DatabaseContentProvider extends ContentProvider {
                 if(projection != null) {
                     columns = new StringBuilder();
                     for (String column : projection)
-                        columns.append(column + ',');
+                        columns.append(column).append(',');
                     columns.deleteCharAt(columns.length() - 1);//remove last colon
                 } else
                     columns = new StringBuilder("*");
@@ -116,7 +114,7 @@ public class DatabaseContentProvider extends ContentProvider {
 
     public static class TableObserver extends ContentObserver {
 
-        private Runnable onChange;
+        private final Runnable onChange;
 
         public TableObserver(Runnable onChange) {
             super(null);
@@ -134,10 +132,6 @@ public class DatabaseContentProvider extends ContentProvider {
             if(!selfChange)
                 onChange.run();
         }
-        /*
-         * Define a method that's called when data in the
-         * observed content provider changes.
-         */
         @Override
         public void onChange(boolean selfChange, Uri changeUri) {
             onChange(selfChange);

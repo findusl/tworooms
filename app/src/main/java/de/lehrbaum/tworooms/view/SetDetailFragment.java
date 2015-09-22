@@ -16,6 +16,8 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 
+import java.security.InvalidParameterException;
+
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
@@ -34,17 +36,14 @@ public class SetDetailFragment extends ListFragment implements LoaderManager.Loa
      */
     public static final String ARG_SET_ID = "set_id";
 
+    private static final int ROLES_LOADER_ID = 0;
+    private static final int INFORMATION_LOADER_ID = 1;
+
     private CursorAdapter mAdapter;
-    private int setId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setId = getArguments().getInt(ARG_SET_ID, Integer.MIN_VALUE);
-        if(setId == Integer.MIN_VALUE) {
-            throw new IllegalArgumentException("Need item id to display item details.");
-        }
 
         mAdapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_list_item_activated_1, null,
@@ -52,52 +51,72 @@ public class SetDetailFragment extends ListFragment implements LoaderManager.Loa
 
         setListAdapter(mAdapter);
 
-        getLoaderManager().initLoader(setId, null, this);
+        getLoaderManager().initLoader(ROLES_LOADER_ID, getArguments(), this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_set_detail, container, false);
-        return rootView;
+        return inflater.inflate(R.layout.fragment_set_detail, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "sets");
-        Cursor c = getActivity().getContentResolver().query(uri, new String[]{"name", "description"},
-                "_id = ?", new String[]{Integer.toString(setId)}, null);
-        c.moveToFirst();
-
-        String name = c.getString(0);
-        TextView nameView = (TextView) view.findViewById(R.id.name_view);
-        nameView.setText(name);
-
-        String desc = c.getString(1);
-        TextView descView = (TextView) view.findViewById(R.id.desc_view);
-        descView.setText(desc);
+        getLoaderManager().initLoader(INFORMATION_LOADER_ID, getArguments(), this);
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int setId, Bundle bundle) {
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "roles");
-        return new CursorLoader(getActivity(), uri,
-                new String[]{"_id", "name"},
-                DatabaseContentProvider.Constants.SET_ROLE_SELECTION,
-                new String[]{Integer.toString(setId)},
-                null);
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+        int setId = bundle.getInt(ARG_SET_ID, Integer.MIN_VALUE);
+        Uri uri;
+        switch (loaderId) {
+            case INFORMATION_LOADER_ID:
+                uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "sets");
+                return new CursorLoader(getActivity(), uri,
+                        new String[]{"name", "description"},
+                        "_id = ?",
+                        new String[]{Integer.toString(setId)},
+                        null);
+            case ROLES_LOADER_ID:
+                uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "roles");
+                return new CursorLoader(getActivity(), uri,
+                        new String[]{"_id", "name"},
+                        DatabaseContentProvider.Constants.SET_ROLE_SELECTION,
+                        new String[]{Integer.toString(setId)},
+                        null);
+            default:
+                throw new InvalidParameterException("No such loader id known " + loaderId);
+        }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         Log.d(TAG, "Cursor count: " + data.getCount());
-        mAdapter.swapCursor(data);
+        switch(loader.getId()) {
+            case ROLES_LOADER_ID:
+                mAdapter.swapCursor(data);
+                break;
+            case INFORMATION_LOADER_ID:
+                if(!isVisible())
+                    return;
+                data.moveToFirst();
+
+                String name = data.getString(0);
+                TextView nameView = (TextView) getView().findViewById(R.id.name_view);
+                nameView.setText(name);
+
+                String desc = data.getString(1);
+                TextView descView = (TextView) getView().findViewById(R.id.desc_view);
+                descView.setText(desc);
+                break;
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
+        if(loader.getId() == ROLES_LOADER_ID)
+            mAdapter.swapCursor(null);
     }
 }
