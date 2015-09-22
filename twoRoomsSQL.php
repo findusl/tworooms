@@ -1,4 +1,3 @@
-http://codular.com/php-mysqli
 <?php 
 $db = new mysqli('rdbms.strato.de', 'U2285767', '', 'DB2285767');
 
@@ -7,31 +6,23 @@ if($db->connect_errno > 0){
 }
 
 $since = $_GET['since'];
+$version = $_GET['v'];
+//TODO: check version
 
-$result = mysqli_query($db, "SELECT * FROM categories WHERE last_modified > '$since'");
-echo "Table: categories";
-echo $result;
-$result->free();
+function echoTable($db, $since, $table) {
+	$result = mysqli_query($db, 'SELECT * FROM '$table' WHERE last_modified > '$since);
+	//http://codular.com/php-mysqli
+	
+	$jsonObject['table'] = $table;
+	
+	$result->free();
+}
 
-$result = mysqli_query($db, "SELECT * FROM roles WHERE last_modified > '$since'");
-echo "Table: roles";
-echo $result;
-$result->free();
-
-$result = mysqli_query($db, "SELECT * FROM sets WHERE last_modified > '$since'");
-echo "Table: sets";
-echo $result;
-$result->free();
-
-$result = mysqli_query($db, "SELECT * FROM set_roles WHERE last_modified > '$since'");
-echo "Table: set_roles";
-echo $result;
-$result->free();
-
-$result = mysqli_query($db, "SELECT * FROM teams WHERE last_modified > '$since'");
-echo "Table: teams";
-echo $result;
-$result->free();
+echoTable($db, $since, 'categories');
+echoTable($db, $since, 'roles');
+echoTable($db, $since, 'sets');
+echoTable($db, $since, 'set_roles');
+echoTable($db, $since, 'teams');
 
 mysqli_close($con);
 ?>
