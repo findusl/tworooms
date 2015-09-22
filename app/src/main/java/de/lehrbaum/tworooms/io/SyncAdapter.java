@@ -16,6 +16,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
@@ -63,6 +64,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.d(TAG, "on Perform Sync called");
         showNotification("On perform Sync called", getContext());
+        URL target = null;
+        InputStream is = null;
+        try {
+            target = new URL("http", "lehrbaum.de", "twoRooms/getChanges.php");
+            is = downloadUrl(target);
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "Malformated url? It is static...", e);
+        } catch (IOException e) {
+            Log.e(TAG, "Error downloading.", e);
+        } finally {
+            if(is != null)
+                try {
+                    is.close();
+                } catch(IOException e) {
+                    Log.w(TAG, "Unable to close inputstream", e);
+                }
+        }
 
         //TODO: connect to server, sync databases
     }
