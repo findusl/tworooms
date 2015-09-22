@@ -188,12 +188,10 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
      * Turns on activate-on-click mode. When this mode is on, list items will be
      * given the 'activated' state when touched.
      */
-    public void setActivateOnItemClick(boolean activateOnItemClick) {
+    public void setActivateOnItemClick() {
         // When setting CHOICE_MODE_SINGLE, ListView will automatically
         // give items the 'activated' state when touched.
-        getListView().setChoiceMode(activateOnItemClick
-                ? ListView.CHOICE_MODE_SINGLE
-                : ListView.CHOICE_MODE_NONE);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
 
     private void setActivatedPosition(int position) {

@@ -13,6 +13,7 @@ import android.util.Log;
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.Authenticator;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import de.lehrbaum.tworooms.io.SyncAdapter;
 
 
 /**
@@ -58,9 +59,8 @@ public class SetListActivity extends Activity
             // 'activated' state when touched.
             ((SetListFragment) getFragmentManager()
                     .findFragmentById(R.id.set_list))
-                    .setActivateOnItemClick(true);
+                    .setActivateOnItemClick();
         }
-
         setSyncUp();
     }
 
@@ -77,8 +77,7 @@ public class SetListActivity extends Activity
                         ACCOUNT_SERVICE);
         accountManager.addAccountExplicitly(newAccount, null, null);
 
-        ContentResolver resolver = getContentResolver();
-        resolver.addPeriodicSync(newAccount, authority,
+        ContentResolver.addPeriodicSync(newAccount, authority,
                 Bundle.EMPTY, /* 5 hours interval */5 * 60 * 60);
 
         Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "votes");
@@ -89,6 +88,7 @@ public class SetListActivity extends Activity
                 ContentResolver.requestSync(newAccount, authority, Bundle.EMPTY);
             }
         };
+        ContentResolver resolver = getContentResolver();
         resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));
     }
 

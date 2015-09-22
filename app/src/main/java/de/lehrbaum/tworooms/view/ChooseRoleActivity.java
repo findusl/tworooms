@@ -1,5 +1,6 @@
 package de.lehrbaum.tworooms.view;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,7 +24,9 @@ public class ChooseRoleActivity extends Activity {
         setContentView(R.layout.activity_choose_role);
 
         // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar aBar = getActionBar();
+        if(aBar != null)
+            aBar.setDisplayHomeAsUpEnabled(true);
 
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
@@ -56,10 +59,11 @@ public class ChooseRoleActivity extends Activity {
 	protected void onStop()
 	{
 		super.onStop();
-		if(mFragment.hasChanged()) {
-        	Log.d(TAG, "On Stop passing Intent " + Arrays.toString(mFragment.getSelection()));
+        long [] selection = mFragment.getSelection();
+		if(selection != null) {
+        	Log.d(TAG, "On Stop passing Intent " + Arrays.toString(selection));
 			Intent intent = new Intent();
-			intent.putExtra(ChooseRoleFragment.SELECTION_INDIZES, mFragment.getSelection());
+			intent.putExtra(ChooseRoleFragment.SELECTION_INDIZES, selection);
 			setResult(RESULT_OK, intent);
 		} else
 			setResult(RESULT_CANCELED);
