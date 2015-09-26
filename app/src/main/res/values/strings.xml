@@ -28,4 +28,7 @@
     <string name="title_activity_role_list">List of roles</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_roles">Roles</string>
+    <string name="account_name">TwoRoomsSync</string>
+    <string name="account_authority">de.lehrbaum.tworooms.database</string>
+    <string name="account_type">de.lehrbaum.tworooms</string>
 </resources>
