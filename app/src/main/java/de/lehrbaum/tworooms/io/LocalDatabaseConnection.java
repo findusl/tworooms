@@ -10,7 +10,7 @@ import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 public class LocalDatabaseConnection extends SQLiteAssetHelper{
 
     private static final String DATABASE_NAME = "tworooms.db";
-    private static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 1;
 
     public LocalDatabaseConnection(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

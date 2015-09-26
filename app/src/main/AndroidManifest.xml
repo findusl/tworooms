@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.lehrbaum.tworooms" >
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+
     <uses-sdk android:minSdkVersion="16" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
     <application
         android:allowBackup="true"
@@ -25,25 +27,16 @@
             android:name=".view.SetDetailActivity"
             android:label="@string/title_set_detail"
             android:parentActivityName=".view.SetListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.SetListActivity" />
         </activity>
         <activity
             android:name=".view.CreateSetActivity"
             android:label="@string/title_activity_create_set"
             android:parentActivityName=".view.SetListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.SetListActivity" />
         </activity>
         <activity
             android:name=".view.ChooseRoleActivity"
             android:label="@string/title_activity_choose_role"
             android:parentActivityName=".view.ChooseRoleActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.CreateSetActivity" />
         </activity>
 
         <provider
@@ -51,29 +44,35 @@
             android:authorities="de.lehrbaum.tworooms.database"
             android:enabled="true"
             android:exported="false"
-            android:syncable="true">
+            android:syncable="true" >
         </provider>
 
-        <service
-            android:name=".io.AuthenticatorService">
+        <service android:name=".io.AuthenticatorService" >
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
+                <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-
         <service
-            android:name="de.lehrbaum.tworooms.io.SyncService"
+            android:name=".io.SyncService"
             android:exported="true"
-            android:process=":sync">
+            android:process=":sync" >
             <intent-filter>
-                <action android:name="android.content.SyncAdapter"/>
+                <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
+
+        <activity
+            android:name=".view.RoleListActivity"
+            android:label="@string/title_activity_role_list"
+            android:parentActivityName=".view.SetListActivity" >
+        </activity>
     </application>
 
 </manifest>

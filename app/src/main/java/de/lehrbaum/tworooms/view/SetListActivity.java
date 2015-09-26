@@ -10,6 +10,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.Authenticator;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;

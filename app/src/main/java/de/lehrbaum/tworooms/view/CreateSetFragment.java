@@ -27,11 +27,13 @@ import android.content.*;
 
 public class CreateSetFragment extends ListFragment{
     private static final String TAG = CreateSetFragment.class.getSimpleName();
+	private static final int REQUEST_SET = Integer.MAX_VALUE - 1;
+	private static final int REQUEST_NEW_VARIATION = Integer.MAX_VALUE - 2;
+
     public static final String VARIATIONS_COUNT = "var_count";
 
     private OnFragmentInteractionListener mListener;
-	
-	//TODO: rename all variables with m at start
+
 	private TextView mNameView;
 
     private List<long []> mVariations;
@@ -73,18 +75,18 @@ public class CreateSetFragment extends ListFragment{
         });
         Button newVariation = (Button) view.findViewById(R.id.button_new_variation);
         newVariation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onAddVariationClicked();
-            }
-        });
+			@Override
+			public void onClick(View v) {
+				onAddVariationClicked();
+			}
+		});
         Button save = (Button) view.findViewById(R.id.button_save_set);
         save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSaveSetClicked();
-            }
-        });
+			@Override
+			public void onClick(View v) {
+				onSaveSetClicked();
+			}
+		});
         return view;
     }
 
@@ -134,28 +136,34 @@ public class CreateSetFragment extends ListFragment{
 
 		// Set up the input
 		final EditText input = new EditText(getActivity());
-		// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-		input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE |
+                InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+		input.setText(mVariationNames.get(position));
 		builder.setView(input);
 
 		// Set up the buttons
 		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() { 
     		@Override
     		public void onClick(DialogInterface dialog, int which) {
-        		mVariationNames.set(position, input.getText().toString());
+				String name = input.getText().toString();
+				if(name.length() == 0)
+					return;
+				mAdapter.remove(mAdapter.getItem(position));
+				mAdapter.insert(name, position);
+        		mVariationNames.set(position, name);
     		}
 		});
 		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-    		@Override
-    		public void onClick(DialogInterface dialog, int which) {
-        		dialog.cancel();
-    		}
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
 		});
 	
 		builder.show();
 	}
 
-    public void addVariation(long [] variation) {
+    private void addVariation(long [] variation) {
         mVariations.add(variation);
 		String name = mNameView.getText().toString();
 		if(name.length() == 0)
@@ -166,24 +174,29 @@ public class CreateSetFragment extends ListFragment{
     }
 
     public void setRoles(int id, long [] selections) {
-        Log.d(TAG, "Set roles called");
-        if(id == -1) {
-            mSetRoles = selections;
-        } else {
-            mVariations.set(id, selections);
-        }
+        Log.v(TAG, "Set roles called");
+		switch (id) {
+			case REQUEST_SET:
+				mSetRoles = selections;
+				break;
+			case REQUEST_NEW_VARIATION:
+				addVariation(selections);
+				break;
+			default:
+				mVariations.set(id, selections);
+		}
     }
 
     protected void onChangeSetClicked() {
 		mListener.removeOldVariation();
 		if(mVariations.size() != 0)
 			Toast.makeText(getActivity(), R.string.warning_change_set, Toast.LENGTH_SHORT).show();
-        mListener.onChangeRoles(-1, mSetRoles);
+        mListener.onChangeRoles(REQUEST_SET, mSetRoles);
     }
 
     protected void onAddVariationClicked() {
 		mListener.removeOldVariation();
-        mListener.onCreateNewVariation(mSetRoles);
+        mListener.onChangeRoles(REQUEST_NEW_VARIATION, mSetRoles);
     }
 
     protected void onSaveSetClicked() {
@@ -231,12 +244,6 @@ public class CreateSetFragment extends ListFragment{
 
     public interface OnFragmentInteractionListener {
         void onChangeRoles(int id, long [] selections);
-
-        /**
-         * This is called to select the roles of a new variation.
-         * @param setRoles The roles of the standard set. They can be preselected for the user.
-         */
-        void onCreateNewVariation(long [] setRoles);
 		
 		/**
 		 * Removes any old pending choose role operations in two pane mode.
