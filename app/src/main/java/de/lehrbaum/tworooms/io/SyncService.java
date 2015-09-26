@@ -10,6 +10,7 @@ import android.os.IBinder;
  * onPerformSync().
  */
 public class SyncService extends Service {
+
     // Storage for an instance of the sync adapter
     private static SyncAdapter sSyncAdapter = null;
     // Object to use as a thread-safe lock

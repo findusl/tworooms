@@ -1,149 +1,161 @@
 package de.lehrbaum.tworooms.view;
 
-import android.app.ListFragment;
-import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.CursorWrapper;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import de.lehrbaum.tworooms.view.util.NoneCursorAdapter;
+import de.lehrbaum.tworooms.view.util.RolesListFragment;
+import de.lehrbaum.tworooms.view.util.SortedCursor;
+
+import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ChooseRoleFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class ChooseRoleFragment extends CategoryRoleListFragment {
     private static final String TAG = ChooseRoleFragment.class.getSimpleName();
 
-    public static final String SELECTION_INDIZES = "selection_ind";
-
-    private CursorAdapter mAdapter;
+    public static final String SELECTION_INDEX = "sel_id";
 	
-	private long [] mStartSelections;
+	private SparseBooleanArray mSelections;
+	private boolean mChanged;
+	private int mSelectionCount;
+	private Map<Integer, SparseIntArray> mRoleCombinations;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+		setUseLongClick(true);
+		long [] startSelections;
         if (getArguments() != null) {
-            mStartSelections = getArguments().getLongArray(SELECTION_INDIZES);
-            Log.i(TAG, "Selection with indizes: " + Arrays.toString(mStartSelections));
+			startSelections = getArguments().getLongArray(SELECTION_INDEX);
+            Log.i(TAG, "Selection with indices: " + Arrays.toString(startSelections));
         }
         else {
-            mStartSelections = new long[0];
+			startSelections = new long[0];
         }
 
-		//Add item @id/android:empty to display while list is empty
-		
-        mAdapter = new SimpleCursorAdapter(getActivity(),
-                android.R.layout.simple_list_item_activated_1, null,
-                new String[] {"name"}, new int[]{android.R.id.text1}, 0);
-        setListAdapter(mAdapter);
-		
-		/*getListView().setOnItemSelectedListener(new OnItemSelectedListener() {
-			void onItemSelected(arg0, arg1, arg2, arg3) {
-				
+		mSelections = new SparseBooleanArray();
+		for (long startSelection : startSelections)
+			mSelections.put((int) startSelection, true);
+		mSelectionCount = startSelections.length;
+
+		getLoaderManager().initLoader(ROLES_LOADER, null, this);
+
+    }
+
+	@Override
+	protected void setBackground(View v, int team) {
+		int color = getTeamColor(team);
+		StateListDrawable states = new StateListDrawable();
+		states.addState(new int[] {android.R.attr.state_activated},
+				new ColorDrawable(color & 0xA0FFFFFF));
+		states.addState(new int[] {},
+				new ColorDrawable(color & ALPHA_COLOR));
+		v.setBackground(states);
+	}
+
+	//==============================================================================================
+	//List callbacks================================================================================
+
+	public long [] getSelection () {
+		if(!mChanged)
+			return null;
+        long [] selections = new long[mSelectionCount];
+
+		for(int i = 0, j = 0; i < mSelections.size(); i++) {
+			if(mSelections.valueAt(i))
+				selections[j++] = mSelections.keyAt(i);
+		}
+
+		return selections;
+    }
+
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		Log.d(TAG, "Drawable state: " + Arrays.toString(v.getDrawableState()));
+		boolean getsSelected = !mSelections.get((int) id, false);
+		if(getsSelected) {
+			Cursor c = (Cursor) mAdapter.getItem(position);
+			int team = c.getInt(3);
+			SparseIntArray arr = mRoleCombinations.get(team);
+			for(int i = 0; i < arr.size(); i++) {
+				l.setItemChecked(arr.keyAt(i), true);
+				onListItemSelection(arr.valueAt(i), true);
 			}
-		});*/
+		} else {
+			onListItemSelection(id, false);
+		}
+	}
 
-        getLoaderManager().initLoader(0, null, this);
+	protected void onListItemSelection(long id, boolean selected) {
+		if(!mChanged)
+			mChanged = true;
+		mSelections.put((int) id, selected);
+		if(selected)
+			mSelectionCount++;
+		else
+			mSelectionCount--;
+	}
 
-        //use setItemChecked method of ListView
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_choose_roles, container, false);
-    }
-
-    public long [] getSelection () {
-        long [] selections = getListView().getCheckedItemIds();;
-        if(Arrays.equals(selections, mStartSelections))
-            return null;
-        else
-            return selections;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "roles");
-        return new CursorLoader(getActivity(), uri, new String[]{"_id", "name"}, null /*TODO: count = people*/, null, null);
-    }
+	//==============================================================================================
+	//Loader Callbacks==============================================================================
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(new SortedCursor(data, mStartSelections));
-        ListView lv = getListView();
-        for(int i = 0; i < mStartSelections.length; i++) {
-            lv.setItemChecked(i, true);
-        }
+		if(loader.getId() == ROLES_LOADER) {
+			SortedCursor sc = new SortedCursor(data);
+			int selected = sc.setSelected(mSelections);
+			mAdapter.swapCursor(sc);
+			ListView lv = getListView();
+			for(int i = 0; i < selected; i++) {
+				lv.setItemChecked(i, true);
+			}
+			initRoleComps(sc);
+		} else  {
+			super.onLoadFinished(loader, data);
+		}
     }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
-    }
-
-    protected class SortedCursor extends CursorWrapper {
-
-        protected int [] mPositionMapping;
-
-        /**
-         * Creates a new sorted cursor that sorts specific elements to the top of the cursor.
-         *
-         * @param selections The IDs of the elements to sort to the top of the cursor.
-         * @param cursor The underlying cursor to wrap.
-         */
-        public SortedCursor(Cursor cursor, long [] selections) {
-            super(cursor);
-            Arrays.sort(selections);
-            int size = cursor.getCount();
-            mPositionMapping = new int [size];
-            int checkedMappings = 0;
-            int unCheckedMappings = selections.length;
-            cursor.moveToFirst();
-            for (int i = 0; i < size; cursor.moveToNext()) {
-                long id = cursor.getLong(0);
-                if (Arrays.binarySearch(selections, id) >= 0)
-                    mPositionMapping[checkedMappings++] = i++;
-                else {
-                    if(unCheckedMappings >= size) {
-                        //this should not happen, but it can happen if some selection is simply no longer in the database.
-                        //then i map to the next position underneath selections.length
-                        Log.e(TAG, "The unchecked mappings extended size. Selections: " + Arrays.toString(selections));
-                        mPositionMapping[selections.length - (++unCheckedMappings - size)] = i++;
-                    } else
-                        mPositionMapping[unCheckedMappings++] = i++;
-                }
-
-            }
-            cursor.moveToFirst();
-        }
-
-        @Override
-        public boolean moveToPosition(int position) {
-            return super.moveToPosition(mPositionMapping[position]);
-        }
-
-        @Override
-        public int getPosition() {
-            int actualPos = super.getPosition();
-            for(int i = 0; i < mPositionMapping.length; i++) {
-                if(mPositionMapping[i] == actualPos)
-                    return i;
-            }
-            throw new UnsupportedOperationException("Cannot find current position in position mapping");
-        }
-    }
+	private void initRoleComps(Cursor sc) {
+		mRoleCombinations = new HashMap<>();
+		SparseIntArray arr = null;
+		int last_team = -1;
+		for(sc.moveToFirst(); !sc.isAfterLast(); sc.moveToNext()) {
+			int group = sc.getInt(3);//group column
+			if(group != last_team) {
+				if(arr != null)
+					mRoleCombinations.put(last_team, arr);
+				last_team = group;
+				arr = mRoleCombinations.get(group);
+				if(arr == null)
+					arr = new SparseIntArray(1);
+			}
+			int pos = sc.getPosition();
+			int id = sc.getInt(0);
+			arr.put(pos, id);
+		}
+		mRoleCombinations.put(last_team, arr);
+	}
 }

@@ -21,14 +21,23 @@ public class DatabaseContentProvider extends ContentProvider {
         public static final String ROLE_COMBINATIONS_TABLE = "roleCombinations";
         public static final String ROLES_TABLE = "roles";
         public static final String TEAMS_TABLE = "teams";
+		public static final String CATEGORIES_TABLE = "categories";
         public static final String SET_ROLES_TABLE = "set_roles";
+        public static final String ID_COLUMN = "_id";
         public static final String NAME_COLUMN = "name";
+		public static final String TEAM_COLUMN = "team_id";
+		public static final String GROUP_COLUMN = "\"group\"";
         public static final String COUNT_COLUMN = "count";
         public static final String PARENT_COLUMN = "parent";
         public static final String DESCRIPTION_COLUMN = "description";
+        public static final String CATEGORY_COLUMN = "category";
         public static final String ID_SET_COLUMN = "id_set";
         public static final String ID_ROLE_COLUMN = "id_role";
-
+		public static final int TEAM_RED = 2;
+		public static final int TEAM_BLUE = 1;
+		public static final int TEAM_GRAY = 3;
+		public static final int TEAM_GREEN = 4;
+		public static final int TEAM_YELLOW = 5;
     }
 
 
@@ -87,23 +96,19 @@ public class DatabaseContentProvider extends ContentProvider {
                  * For this we need to use joins which cannot be done with the normal query method.
                  * Therefore we use raw query.
                  */
-                StringBuilder columns;
+                StringBuilder query = new StringBuilder("SELECT ");
                 if(projection != null) {
-                    columns = new StringBuilder();
                     for (String column : projection)
-                        columns.append(column).append(',');
-                    columns.deleteCharAt(columns.length() - 1);//remove last colon
+                        query.append(column).append(',');
+                    query.setCharAt(query.length() - 1, ' ');//remove last colon
                 } else
-                    columns = new StringBuilder("*");
-                /*
-                 *
-                 * Any sort order passed to this function is just appended at the end.
-                 */
-                c = db.rawQuery("SELECT _id, name, description " +
-                                "FROM roles JOIN set_roles ON _id = id_role " +
-                                "WHERE id_set = ? " +
-                                (sortOrder == null ? "" : " ORDER BY " + sortOrder),
-                        selectionArgs);
+                    query.append("* ");
+				query.append("FROM roles JOIN set_roles ON _id = id_role WHERE id_set = ? ");
+				if(sortOrder != null) {
+					query.append(" ORDER BY ");
+					query.append(sortOrder);
+				}
+                c = db.rawQuery(query.toString(), selectionArgs);
                 break;
             default:
                 c = db.query(table, projection, selection, selectionArgs, null, null, sortOrder);

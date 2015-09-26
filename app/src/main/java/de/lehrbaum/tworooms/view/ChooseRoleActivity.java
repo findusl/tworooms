@@ -32,8 +32,8 @@ public class ChooseRoleActivity extends Activity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-			long [] selIndizes = getIntent().getLongArrayExtra(ChooseRoleFragment.SELECTION_INDIZES);
-			arguments.putLongArray(ChooseRoleFragment.SELECTION_INDIZES, selIndizes);
+			long [] selIndizes = getIntent().getLongArrayExtra(ChooseRoleFragment.SELECTION_INDEX);
+			arguments.putLongArray(ChooseRoleFragment.SELECTION_INDEX, selIndizes);
             mFragment = new ChooseRoleFragment();
             mFragment.setArguments(arguments);
             getFragmentManager().beginTransaction()
@@ -46,9 +46,10 @@ public class ChooseRoleActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            Intent intent = new Intent(this, CreateSetActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
+			setResult();
+//          Intent intent = new Intent(this, CreateSetActivity.class);
+//			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//			startActivity(intent);
             finish();
             return true;
         }
@@ -56,17 +57,27 @@ public class ChooseRoleActivity extends Activity {
     }
 
 	@Override
+	public void onBackPressed() {
+		setResult();
+		super.onBackPressed();
+	}
+
+	private void setResult() {
+		//standard result is canceled
+		if(mFragment == null)
+			return;
+		long [] selection = mFragment.getSelection();
+		if(selection != null) {
+			Intent intent = new Intent();
+			intent.putExtra(ChooseRoleFragment.SELECTION_INDEX, selection);
+			setResult(RESULT_OK, intent);
+		}
+	}
+
+	@Override
 	protected void onStop()
 	{
 		super.onStop();
-        long [] selection = mFragment.getSelection();
-		if(selection != null) {
-        	Log.d(TAG, "On Stop passing Intent " + Arrays.toString(selection));
-			Intent intent = new Intent();
-			intent.putExtra(ChooseRoleFragment.SELECTION_INDIZES, selection);
-			setResult(RESULT_OK, intent);
-		} else
-			setResult(RESULT_CANCELED);
 	}
 	
 	

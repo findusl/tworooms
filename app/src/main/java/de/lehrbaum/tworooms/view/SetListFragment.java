@@ -9,15 +9,15 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.*;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
@@ -25,6 +25,8 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 import android.view.ContextMenu.*;
 import android.view.*;
 import android.widget.AdapterView.*;
+
+import org.w3c.dom.Text;
 
 /**
  * A list fragment representing a list of sets. This fragment
@@ -35,8 +37,10 @@ import android.widget.AdapterView.*;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class SetListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class SetListFragment extends ListFragment
+		implements LoaderManager.LoaderCallbacks<Cursor>, TextWatcher{
     private static final String TAG = SetListFragment.class.getSimpleName();
+	private static final String SEL_COUNT = COUNT_COLUMN;
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -92,7 +96,12 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
 		//registerForContextMenu(getListView()); make id for creator
+		EditText tv = (EditText) view.findViewById(R.id.search_field);
+		tv.addTextChangedListener(this);
     }
+
+    //==============================================================================================
+	//Menu callbacks================================================================================
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -107,6 +116,13 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
                 Intent createIntent = new Intent(this.getActivity(), CreateSetActivity.class);
                 startActivity(createIntent);
                 return true;
+			case R.id.action_settings:
+				Toast.makeText(getActivity(), R.string.warning_no_settings, Toast.LENGTH_LONG).show();
+				return true;
+			case R.id.action_roles:
+				Intent rolesIntent = new Intent(this.getActivity(), RoleListActivity.class);
+				startActivity(rolesIntent);
+				return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -116,7 +132,6 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
 	{
 		if(v.getId() == android.R.id.list) {
 			MenuInflater inflater = getActivity().getMenuInflater();
-			
 		}
 		super.onCreateContextMenu(menu, v, menuInfo);
 	}
@@ -126,16 +141,60 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
 		switch(item.getItemId()) {
 			case R.id.action_delete:
 				AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
-				
 				return true;
 		}
 		return super.onContextItemSelected(item);
 	}
 
+	//==============================================================================================
+	//List callbacks================================================================================
+
+	@Override
+	public void onListItemClick(ListView listView, View view, int position, long id) {
+		super.onListItemClick(listView, view, position, id);
+
+		// Notify the active callbacks interface (the activity, if the
+		// fragment is attached to one) that an item has been selected.
+		mCallbacks.onItemSelected((int) id);
+	}
+
+	/**
+	 * Turns on activate-on-click mode. When this mode is on, list items will be
+	 * given the 'activated' state when touched.
+	 */
+	public void setActivateOnItemClick() {
+		// When setting CHOICE_MODE_SINGLE, ListView will automatically
+		// give items the 'activated' state when touched.
+		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+	}
+
+	private void setActivatedPosition(int position) {
+		if (position == ListView.INVALID_POSITION) {
+			getListView().setItemChecked(mActivatedPosition, false);
+		} else {
+			getListView().setItemChecked(position, true);
+		}
+
+		mActivatedPosition = position;
+	}
+
+	//==============================================================================================
+	//Loader callbacks==============================================================================
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
-        return new CursorLoader(getActivity(), uri, new String[]{"_id", "name"}, null /*TODO: count = people*/, null, null);
+		StringBuilder selection = new StringBuilder();
+		if(args != null && args.size() > 0) {
+			if(args.containsKey(SEL_COUNT)) {
+				selection.append(COUNT_COLUMN);
+				selection.append(" = ");
+				selection.append(args.get(SEL_COUNT));
+			}
+		}
+		String selectionString = selection.length() > 0 ? selection.toString() : null;
+        return new CursorLoader(getActivity(), uri, new String[]{ID_COLUMN, NAME_COLUMN},
+				selectionString, null, null);
     }
 
     @Override
@@ -148,9 +207,12 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
         mAdapter.swapCursor(null);
     }
 
+	//==============================================================================================
+	//Activity communication========================================================================
+
     @Override
     public void onAttach(Activity activity) {
-        super.onAttach(activity);
+		super.onAttach(activity);
 
         // Activities containing this fragment must implement its callbacks.
         if (!(activity instanceof Callbacks)) {
@@ -166,45 +228,46 @@ public class SetListFragment extends ListFragment implements LoaderManager.Loade
         mCallbacks = null;
     }
 
-    @Override
-    public void onListItemClick(ListView listView, View view, int position, long id) {
-        super.onListItemClick(listView, view, position, id);
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mActivatedPosition != ListView.INVALID_POSITION) {
+			// Serialize and persist the activated item position.
+			outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
+		}
+	}
 
-        // Notify the active callbacks interface (the activity, if the
-        // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected((int) id);
-    }
+	//==============================================================================================
+	//Query callbacks===============================================================================
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (mActivatedPosition != ListView.INVALID_POSITION) {
-            // Serialize and persist the activated item position.
-            outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
-        }
-    }
+	@Override
+	public void afterTextChanged(Editable s) {
 
-    /**
-     * Turns on activate-on-click mode. When this mode is on, list items will be
-     * given the 'activated' state when touched.
-     */
-    public void setActivateOnItemClick() {
-        // When setting CHOICE_MODE_SINGLE, ListView will automatically
-        // give items the 'activated' state when touched.
-        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-    }
+		if(s.length() == 0) {
+			getLoaderManager().restartLoader(0, null, this);
+			return;
+		}
+		try {
+			int count = Integer.parseInt(s.toString());
+			Bundle args = new Bundle();
+			args.putInt(SEL_COUNT, count);
+			getLoaderManager().restartLoader(0, args, this);
+		} catch (Exception e) {
 
-    private void setActivatedPosition(int position) {
-        if (position == ListView.INVALID_POSITION) {
-            getListView().setItemChecked(mActivatedPosition, false);
-        } else {
-            getListView().setItemChecked(position, true);
-        }
+		}
+	}
 
-        mActivatedPosition = position;
-    }
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		//unused
+	}
 
-    /**
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		//unused
+	}
+
+	/**
      * A callback interface that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
      * selections.

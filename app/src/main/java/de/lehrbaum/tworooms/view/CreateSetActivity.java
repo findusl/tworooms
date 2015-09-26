@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
@@ -51,15 +52,12 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
             Fragment old = getFragmentManager().findFragmentByTag(CHOOSE_ROLE_TAG);
             if(old != null && old instanceof ChooseRoleFragment) {
                 ChooseRoleFragment fragment = (ChooseRoleFragment) old;
-                if(!fragment.hasChanged())
-                    return;
+                long [] old_selection = fragment.getSelection();
+                if(old_selection == null)
+                    return;//no change
                 Bundle arguments = old.getArguments();
                 int old_id = arguments.getInt(SELECTION_ID);
-                long [] old_selection = fragment.getSelection();
-                if(old_id == -2)
-                    mFragment.addVariation(old_selection);
-                else
-                    mFragment.setRoles(old_id, old_selection);
+				mFragment.setRoles(old_id, old_selection);
             }
 		}
 	}
@@ -69,7 +67,7 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
         if (mTwoPane) {
             //put new fragment
             Bundle arguments = new Bundle();
-            arguments.putLongArray(ChooseRoleFragment.SELECTION_INDIZES, selections);
+            arguments.putLongArray(ChooseRoleFragment.SELECTION_INDEX, selections);
             arguments.putInt(SELECTION_ID, id);
             Fragment fragment = new ChooseRoleFragment();
             fragment.setArguments(arguments);
@@ -81,29 +79,17 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, ChooseRoleActivity.class);
-            detailIntent.putExtra(ChooseRoleFragment.SELECTION_INDIZES, selections);
+            detailIntent.putExtra(ChooseRoleFragment.SELECTION_INDEX, selections);
             startActivityForResult(detailIntent, id);
         }
     }
 
     @Override
-    public void onCreateNewVariation(long[] setRoles) {
-		//not so nice. The ids should be fully managed 
-		//by the fragment or not at all. But will have to change anyway
-		//when name and description for variations become possible so i
-		//leave it for now
-        onChangeRoles(-2, setRoles);
-    }
-
-    @Override
     protected final void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK) {
-            Log.d(TAG, "Result = ok");
-            long [] selection = data.getLongArrayExtra(ChooseRoleFragment.SELECTION_INDIZES);
-            if(requestCode == -2)
-                mFragment.addVariation(selection);
-            else
-                mFragment.setRoles(requestCode, selection);
+            long [] selection = data.getLongArrayExtra(ChooseRoleFragment.SELECTION_INDEX);
+			Log.d(TAG, "Result ok. selection: " + Arrays.toString(selection));
+			mFragment.setRoles(requestCode, selection);
         }
     }
 

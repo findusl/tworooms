@@ -10,7 +10,9 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:hint="@string/hint_search_query" />
+        android:hint="@string/hint_search_query"
+              android:enabled="true"
+              android:inputType="numberDecimal"/>
 
     <ListView android:id="@android:id/list"
         android:layout_width="match_parent"

@@ -22,4 +22,10 @@
 	<string name="error_set_roles">Please select the basic roles.</string>
 	<string name="action_delete">Delete</string>
 	<string name="action_rename">Rename</string>
+    <string name="no_filter">Kein Filter</string>
+    <string name="title_dialog_role_description">Role description</string>
+    <string name="warning_no_settings">Settings are not yet implemented.</string>
+    <string name="title_activity_role_list">List of roles</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_roles">Roles</string>
 </resources>
