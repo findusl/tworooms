@@ -68,31 +68,39 @@ public class SetListActivity extends Activity
     }
 
     private void setSyncUp() {
-        final String account = "TwoRoomsSync";
-        final String account_type = Authenticator.ACCOUNT_TYPE;
-        final String authority = "de.lehrbaum.tworooms.database";
+        final String account = getString(R.string.account_name);
+        final String account_type = getString(R.string.account_type);
+        final String authority = getString(R.string.account_authority);
 
-        final Account newAccount = new Account(
+        final Account accountInstance = new Account(
                 account, account_type);
         // Get an instance of the Android account manager
         AccountManager accountManager =
                 (AccountManager) getSystemService(
                         ACCOUNT_SERVICE);
-        accountManager.addAccountExplicitly(newAccount, null, null);
+        accountManager.addAccountExplicitly(accountInstance, null, null);
 
-        ContentResolver.addPeriodicSync(newAccount, authority,
+        ContentResolver.addPeriodicSync(accountInstance, authority,
                 Bundle.EMPTY, /* 5 hours interval */5 * 60 * 60);
 
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "votes");
+        /*Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "votes");
 
         Runnable onChange = new Runnable() {
             @Override
             public void run() {
-                ContentResolver.requestSync(newAccount, authority, Bundle.EMPTY);
+                ContentResolver.requestSync(accountInstance, authority, Bundle.EMPTY);
             }
         };
         ContentResolver resolver = getContentResolver();
-        resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));
+        resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));*/
+
+		//TODO: for testing only.
+		/*Bundle settingsBundle = new Bundle();
+		settingsBundle.putBoolean(
+				ContentResolver.SYNC_EXTRAS_MANUAL, true);
+		settingsBundle.putBoolean(
+				ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+		ContentResolver.requestSync(accountInstance, authority, settingsBundle);*/
     }
 
     /**

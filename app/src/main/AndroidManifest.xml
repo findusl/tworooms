@@ -41,7 +41,7 @@
 
         <provider
             android:name=".io.DatabaseContentProvider"
-            android:authorities="de.lehrbaum.tworooms.database"
+            android:authorities="@string/account_authority"
             android:enabled="true"
             android:exported="false"
             android:syncable="true" >
@@ -55,6 +55,7 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
         <service
             android:name=".io.SyncService"
             android:exported="true"
@@ -62,7 +63,6 @@
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-
             <meta-data
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />

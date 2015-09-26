@@ -94,7 +94,6 @@ public class ChooseRoleFragment extends CategoryRoleListFragment {
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		Log.d(TAG, "Drawable state: " + Arrays.toString(v.getDrawableState()));
 		boolean getsSelected = !mSelections.get((int) id, false);
 		if(getsSelected) {
 			Cursor c = (Cursor) mAdapter.getItem(position);
@@ -150,7 +149,7 @@ public class ChooseRoleFragment extends CategoryRoleListFragment {
 				last_team = group;
 				arr = mRoleCombinations.get(group);
 				if(arr == null)
-					arr = new SparseIntArray(1);
+					arr = new SparseIntArray();
 			}
 			int pos = sc.getPosition();
 			int id = sc.getInt(0);
