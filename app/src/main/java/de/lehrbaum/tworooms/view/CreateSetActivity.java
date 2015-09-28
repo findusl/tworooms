@@ -44,20 +44,27 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
     private static final String SELECTION_ID = "sel_id";
     private static final String CHOOSE_ROLE_TAG = "crt";
 
+    /**
+     * In Two pane mode this saves the data of open choose role fragments. Removes the fragment if
+     * saving the data makes it invalid. For example if it created a new variation
+     */
 	@Override
-	public void removeOldVariation()//TODO rename
+	public void saveOpenVariation()
 	{
 		if(mTwoPane) {
-            //first retrieve the old fragment
-            Fragment old = getFragmentManager().findFragmentByTag(CHOOSE_ROLE_TAG);
-            if(old != null && old instanceof ChooseRoleFragment) {
-                ChooseRoleFragment fragment = (ChooseRoleFragment) old;
-                long [] old_selection = fragment.getSelection();
-                if(old_selection == null)
+            //first retrieve the open fragment
+            Fragment open = getFragmentManager().findFragmentByTag(CHOOSE_ROLE_TAG);
+            if(open != null && open instanceof ChooseRoleFragment) {
+                ChooseRoleFragment fragment = (ChooseRoleFragment) open;
+                long [] selection = fragment.getSelection();
+                if(selection == null)
                     return;//no change
-                Bundle arguments = old.getArguments();
-                int old_id = arguments.getInt(SELECTION_ID);
-				mFragment.setRoles(old_id, old_selection);
+                Bundle arguments = open.getArguments();
+                int selId = arguments.getInt(SELECTION_ID);
+				boolean remove = mFragment.setRoles(selId, selection);
+                if(remove) {
+                    getFragmentManager().beginTransaction().remove(open).commit();
+                }
             }
 		}
 	}

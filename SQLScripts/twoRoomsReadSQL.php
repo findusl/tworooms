@@ -30,6 +30,7 @@ function echoTable($db, $since, $table, $columns, $intColumns) {
 			$row[$index] = intval($row[$index]);
 		}
 		//echo 'Getting row ' . json_encode($row) . '<br>';
+		//echo 'example from the row: ' . $row[1];
 		$tableAsArray[] = $row;
 	}
 
