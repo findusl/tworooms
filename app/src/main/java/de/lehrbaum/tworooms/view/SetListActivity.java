@@ -78,12 +78,10 @@ public class SetListActivity extends Activity
         AccountManager accountManager =
                 (AccountManager) getSystemService(
                         ACCOUNT_SERVICE);
-        accountManager.addAccountExplicitly(accountInstance, null, null);
+        boolean firstTime = accountManager.addAccountExplicitly(accountInstance, null, null);
 
         ContentResolver.addPeriodicSync(accountInstance, authority,
                 Bundle.EMPTY, /* 5 hours interval */5 * 60 * 60);
-
-        /*Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "votes");
 
         Runnable onChange = new Runnable() {
             @Override
@@ -92,15 +90,18 @@ public class SetListActivity extends Activity
             }
         };
         ContentResolver resolver = getContentResolver();
-        resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));*/
+        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "votes");
+        resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));
+        uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "sets");
+        resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));
 
-		//TODO: for testing only.
-		/*Bundle settingsBundle = new Bundle();
-		settingsBundle.putBoolean(
-				ContentResolver.SYNC_EXTRAS_MANUAL, true);
-		settingsBundle.putBoolean(
-				ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-		ContentResolver.requestSync(accountInstance, authority, settingsBundle);*/
+        if(firstTime) {
+            //request a sync
+            Bundle settingsBundle = new Bundle();
+            settingsBundle.putBoolean(
+                    ContentResolver.SYNC_EXTRAS_MANUAL, true);
+            ContentResolver.requestSync(accountInstance, authority, settingsBundle);
+        }
     }
 
     /**

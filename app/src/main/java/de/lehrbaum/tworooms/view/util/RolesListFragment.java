@@ -27,7 +27,7 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 public class RolesListFragment extends ListFragment implements AdapterView.OnItemLongClickListener,
 		LoaderManager.LoaderCallbacks<Cursor>, SimpleCursorAdapter.ViewBinder{
 	private static final String TAG = RolesListFragment.class.getSimpleName();
-	protected static final int ALPHA_COLOR = 0x28FFFFFF;
+	protected static final int ALPHA_COLOR = 0x38FFFFFF;
 	protected static final String ITEM_INDEX = "id";
 
 	protected static final int ROLES_LOADER = 1;

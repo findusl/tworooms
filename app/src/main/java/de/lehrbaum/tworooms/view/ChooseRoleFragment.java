@@ -36,7 +36,7 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 public class ChooseRoleFragment extends CategoryRoleListFragment {
     private static final String TAG = ChooseRoleFragment.class.getSimpleName();
 
-    public static final String SELECTION_INDEX = "sel_id";
+    public static final String SELECTION_INDEX = "sel_index";
 	
 	private SparseBooleanArray mSelections;
 	private boolean mChanged;
@@ -70,7 +70,7 @@ public class ChooseRoleFragment extends CategoryRoleListFragment {
 		int color = getTeamColor(team);
 		StateListDrawable states = new StateListDrawable();
 		states.addState(new int[] {android.R.attr.state_activated},
-				new ColorDrawable(color & 0xA0FFFFFF));
+				new ColorDrawable(color & 0xC0FFFFFF));
 		states.addState(new int[] {},
 				new ColorDrawable(color & ALPHA_COLOR));
 		v.setBackground(states);
