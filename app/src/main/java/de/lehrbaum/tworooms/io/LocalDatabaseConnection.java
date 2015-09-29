@@ -11,15 +11,10 @@ import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 public class LocalDatabaseConnection extends SQLiteAssetHelper{
 
     private static final String DATABASE_NAME = "tworooms.db";
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;//Version for second play store release
 
     public LocalDatabaseConnection(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         setForcedUpgrade();
     }
-
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		super.onUpgrade(db, oldVersion, newVersion);
-	}
 }

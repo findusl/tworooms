@@ -19,49 +19,66 @@ public class SQLCreator {
 			BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
 			System.out.println("Current max index: ");
 			int i = Integer.parseInt(bf.readLine())+1;
-			while(true) {
-				StringBuilder query = new StringBuilder("INSERT INTO roles VALUES (");
-				query.append(i);
-				int endIndex = query.length();
-				query.append(",\"");
-				System.out.println("Name: ");
-				String firstInput = bf.readLine();
-				if(firstInput.equalsIgnoreCase("exit"))
-					break;
-				query.append(firstInput);
-				query.append("\",\"");
-				System.out.println("Beschreibung: ");
-				query.append(bf.readLine());
-				query.append("\",");
-				System.out.println("team: ");
-				String team = bf.readLine();
-				int teamIndex;
-				if(team.equalsIgnoreCase("1,2")) {
-					teamIndex = query.length();
-					query.append(1);
-				} else {
-					teamIndex = -1;
-					query.append(team);
-				}
-				query.append(',');
-				query.append(i++);
-				query.append(',');
-				System.out.println("category: ");
-				query.append(bf.readLine());
-				query.append(");");
-				String s = query.toString();
-				System.out.println(s);
-				writer.print(s);
-				if(teamIndex != -1) {
-					query.replace(26, endIndex, Integer.toString(i));
-					query.setCharAt(teamIndex, '2');
-					s = query.toString();
+			//TODO: make possible to insert at any point. Meaning just increase all the others and then insert. first check how to dow with group column
+			try {
+				while(true) {
+					StringBuilder query = new StringBuilder("INSERT INTO roles_en (_id, name, team_id, 'group', category) VALUES (");
+					query.append(i);
+					int endIndex = query.length();
+					query.append(",\"");
+					query.append(read("Name: ", bf));
+					//TODO make split based on names not with the awkward commata behind the team
+					query.append("\",");
+					String team = read("team: ", bf);
+					int teamIndex;
+					boolean groupSet = false;
+					if(team.equalsIgnoreCase("1,2")) {
+						teamIndex = query.length();
+						query.append(1);
+					} else if(team.contains(",")) {
+						String [] parts = team.split(",");
+						teamIndex = -1;
+						query.append(parts[0]);
+						query.append(',');
+						query.append(parts[1]);
+						groupSet = true;
+					} else {
+						teamIndex = -1;
+						query.append(team);
+					}
+					if(!groupSet) {
+					query.append(',');
+					query.append(i);
+					}
+					query.append(',');
+					query.append(read("category: ", bf));
+					query.append(");");
+					String s = query.toString();
 					System.out.println(s);
 					writer.print(s);
+					if(teamIndex != -1) {
+						query.replace(69, endIndex, Integer.toString(++i));
+						query.setCharAt(teamIndex, '2');
+						s = query.toString();
+						System.out.println(s);
+						writer.print(s);
+					}
+					i++;
 				}
+			} catch (InterruptedException e) {
+				//user interrupt
 			}
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
+	}
+	
+	private static String read(String what, BufferedReader reader) throws IOException, InterruptedException {
+		System.out.println(what);
+		String input = reader.readLine();
+		if(input.equalsIgnoreCase("exit")){
+			throw new InterruptedException("User interrupt.");
+		}
+		return input;
 	}
 }

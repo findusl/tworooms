@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.Locale;
+
 public class DatabaseContentProvider extends ContentProvider {
     private static final String TAG = DatabaseContentProvider.class.getSimpleName();
 
@@ -37,7 +39,9 @@ public class DatabaseContentProvider extends ContentProvider {
 		public static final int TEAM_BLUE = 1;
 		public static final int TEAM_GRAY = 3;
 		public static final int TEAM_GREEN = 4;
-		public static final int TEAM_YELLOW = 5;
+        public static final int TEAM_YELLOW = 5;
+        public static final int TEAM_VIOLETT = 6;
+        public static final int TEAM_BLACK = 7;
     }
 
 
@@ -56,7 +60,7 @@ public class DatabaseContentProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         Log.v(TAG, "insert");
         getContext().getContentResolver().notifyChange(uri, null);
-        String table = uri.getLastPathSegment();
+        String table = localize(uri.getLastPathSegment());
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         long rowId = db.insert(table, null, values);
         return Uri.withAppendedPath(Constants.CONTENT_URI, String.valueOf(rowId));
@@ -67,7 +71,7 @@ public class DatabaseContentProvider extends ContentProvider {
                       String[] selectionArgs) {
         Log.v(TAG, "update");
         getContext().getContentResolver().notifyChange(uri, null);
-        String table = uri.getLastPathSegment();
+        String table = localize(uri.getLastPathSegment());
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         return db.update(table, values, selection, selectionArgs);
     }
@@ -76,7 +80,7 @@ public class DatabaseContentProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         Log.v(TAG, "delete");
         getContext().getContentResolver().notifyChange(uri, null);
-        String table = uri.getLastPathSegment();
+        String table = localize(uri.getLastPathSegment());
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         return db.delete(table, selection, selectionArgs);
     }
@@ -85,7 +89,7 @@ public class DatabaseContentProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         Log.v(TAG, "query");
-        String table = uri.getLastPathSegment();
+        String table = localize(uri.getLastPathSegment());
         SQLiteDatabase db = dbConnection.getReadableDatabase();
         Cursor c;
         if(selection == null) selection = "";
@@ -103,7 +107,9 @@ public class DatabaseContentProvider extends ContentProvider {
                     query.setCharAt(query.length() - 1, ' ');//remove last colon
                 } else
                     query.append("* ");
-				query.append("FROM roles JOIN set_roles ON _id = id_role WHERE id_set = ? ");
+				query.append("FROM ");
+                query.append(table);
+                query.append(" JOIN set_roles ON _id = id_role WHERE id_set = ? ");
 				if(sortOrder != null) {
 					query.append(" ORDER BY ");
 					query.append(sortOrder);
@@ -115,6 +121,19 @@ public class DatabaseContentProvider extends ContentProvider {
         }
         c.setNotificationUri(getContext().getContentResolver(), uri);
         return c;
+    }
+
+    private String localize(String table) {
+        //String locale = "_" + Locale.getDefault().getLanguage();
+        String locale = "_en";
+        switch(table) {
+            case Constants.ROLES_TABLE:
+            case Constants.CATEGORIES_TABLE:
+            case Constants.TEAMS_TABLE:
+                return table + locale;
+            default:
+                return table;
+        }
     }
 
     public static class TableObserver extends ContentObserver {

@@ -212,7 +212,7 @@ public class CreateSetFragment extends ListFragment {
         mVariations.add(variation);
         String name = mNameView.getText().toString();
         if(name.length() == 0)
-            name = getActivity().getString(R.string.option_set_variation);
+            name = getActivity().getString(R.string.default_new_variation);
         //increment before because starting to count at 1 is more intuitive
         name +=  " v" + (++mAutoIncrementVariation+1);
         mVariationNames.add(name);
