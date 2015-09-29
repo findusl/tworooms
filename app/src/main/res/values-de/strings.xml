@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_delete">Löschen</string>
+    <string name="action_rename">Umbenennen</string>
+    <string name="action_roles">Rollen</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="button_change_set">Set ändern</string>
+    <string name="button_new_variation">Variation hinzufügen</string>
+    <string name="button_save_set">Speichern und beenden</string>
+    <string name="error_set_name">Bitte einen Namen eingeben.</string>
+    <string name="error_set_roles">Bitte basis Rollen für das Set auswählen.</string>
+    <string name="hint_search_query">Anzahl der Spieler eingeben</string>
+    <string name="hint_set_desc">Beschreibung des Sets</string>
+    <string name="hint_set_name">Name des Sets</string>
+    <string name="menu_set_create">Set erstellen</string>
+    <string name="no_filter">Kein Filter</string>
+    <string name="option_create_new_variation"> </string>
+    <string name="title_activity_choose_role">Rollen auswählen</string>
+    <string name="title_activity_create_set">Neues Set erstellen</string>
+    <string name="title_activity_role_list">Liste der Rollen</string>
+    <string name="title_dialog_change_name">Neuen Namen eingeben</string>
+    <string name="title_dialog_role_description">Beschreibung der Rolle</string>
+    <string name="title_role_detail">Details der Rolle</string>
+    <string name="title_role_list">Rollen</string>
+    <string name="title_set_detail">Details des Sets</string>
+    <string name="warning_change_set">Bestehende Variationen werden nicht geändert.</string>
+    <string name="default_new_variation">Set variation</string>
+</resources>

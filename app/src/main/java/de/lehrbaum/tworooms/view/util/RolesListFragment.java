@@ -7,6 +7,7 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -92,7 +93,12 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 			case TEAM_YELLOW:
 				colorRes = android.R.color.holo_orange_light;
 				break;
-		}
+			case TEAM_VIOLETT:
+				colorRes = android.R.color.holo_purple;
+				break;
+            case TEAM_BLACK:
+                return Color.BLACK;
+        }
 		int color = getActivity().getResources().getColor(colorRes);
 		return color;
 	}
