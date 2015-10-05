@@ -17,4 +17,11 @@ public class LocalDatabaseConnection extends SQLiteAssetHelper{
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         setForcedUpgrade();
     }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        if(!db.isReadOnly())
+            db.setForeignKeyConstraintsEnabled(true);
+    }
 }
