@@ -1,0 +1,7 @@
+There are Effects that logically should be happening but according to the descriptions they don't work:
+- If Ahab dies from the Sniper and Moby does not die, will he win even if he is in the same room as ahab? (after all dead is dead)
+- If the survivor dies from the Sniper but is not in the same room as the bomber does he still win? (after all dead is dead, he should loose)
+- Can the sniper kill the target if it is already dead, for example because of the Tuesday Knight? (usually the bomber explodes after the game pauses, but the 'hug' power already works before that according to it's description. This is just something that is maybe not correctly explained)
+- Does the victim also win if he gets killed by the sniper? (after all dead is dead)
+- According to 'dead is dead' theoretically target and decoil should be affected by the bomber as well, but that would completely destroy there interaction, therefore i see why this would not be good.
+- May it be that the wife is missing in the role description pdf?

@@ -1,11 +1,8 @@
 <?php
-$currentVersion = 1.0;//is there some way to make constant?
+$currentVersion = 3;//is there some way to make constant?
 $version = $_GET['v'];//will version be identifed correctly as an int or even double?
 
-if($version < $currentVersion) {
-	//does die sent the message to the caller?
-    die('Version is to small. Needs at least version ' . $currentVersion . '. Please update your app');
-}
+//TODO: when database structure changes make update depending on version.
 
 //echo 'trying to establish connection' . '<br>';
 $db = new mysqli('rdbms.strato.de', '***REMOVED***', '***REMOVED***', '***REMOVED***');
