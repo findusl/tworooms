@@ -35,6 +35,7 @@ public class DatabaseContentProvider extends ContentProvider {
         public static final String CATEGORY_COLUMN = "category";
         public static final String ID_SET_COLUMN = "id_set";
         public static final String ID_ROLE_COLUMN = "id_role";
+        public static final String FROM_SERVER_COLUMN = "from_server";
 		public static final int TEAM_RED = 2;
 		public static final int TEAM_BLUE = 1;
 		public static final int TEAM_GRAY = 3;

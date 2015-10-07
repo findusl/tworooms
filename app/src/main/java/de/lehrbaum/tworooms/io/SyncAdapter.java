@@ -2,6 +2,7 @@ package de.lehrbaum.tworooms.io;
 
 import android.accounts.Account;
 import android.content.*;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,10 +19,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.SETS_TABLE;
+import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 
 /**
  * Handle the transfer of data between a server and an
@@ -29,9 +33,6 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.SETS_TAB
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = SyncAdapter.class.getSimpleName();
 	private static final String LAST_DOWN_PREF = "last down";
-    private static final String LAST_UP_PREF = "last up";
-
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 
     public static final String SYNC_PREFERENCES = "Sync Preferences";
 
@@ -63,31 +64,80 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.d(TAG, "on Perform Sync called");
         SharedPreferences prefs = getContext().getSharedPreferences(SYNC_PREFERENCES, 0);
-        uploadChanges(prefs);
-        downloadChanges(prefs);
+        int [] ids;
+        int retries = 0;
+        while(retries < 5) {
+            try {
+                //TODO: set numInsertions etc in syncResult correctly
+                ids = uploadChanges(syncResult, prefs);
+                downloadChanges(syncResult, prefs, ids);
+                return;
+            } catch (MalformedURLException e) {
+                Log.e(TAG, "Malformed url? How can that be with a static URL?", e);
+                syncResult.stats.numParseExceptions++;
+                return;
+            } catch (IOException e) {
+                Log.w(TAG, "Problem sending. Probably just network error.", e);
+                syncResult.stats.numIoExceptions++;
+            } catch (JSONException e) {
+                Log.e(TAG, "Problem with the JSON from the server.", e);
+                syncResult.stats.numParseExceptions++;
+                return;
+            }
+        }
+        //If we reach this point there have been to many retries
+        syncResult.tooManyRetries = true;
     }
 
-    private void uploadChanges(SharedPreferences prefs) {
+    private int [] uploadChanges(SyncResult syncResult, SharedPreferences prefs) throws IOException {
         String userId = Settings.Secure.ANDROID_ID;
+        InputStream is = null;
         URL target = null;
         try {
-            long lastSync = prefs.getLong(LAST_UP_PREF, 0);
-            Date d = new Date(lastSync);
-
             Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
-            String jsonString = null;
-            String htmlString = Html.escapeHtml(jsonString).toString();
-        } catch (RuntimeException e) {
-
+            Cursor c = mContentResolver.query(uri, null, FROM_SERVER_COLUMN + " = 1", null, PARENT_COLUMN + " ASC");
+            int[] ids = new int[c.getCount()];
+            if(c.getCount() > 0) {//if no changed sets do nothing.
+                target = new URL("http", "lehrbaum.de", "twoRoomWriteSQL.php");
+                JSONArray sets = new JSONArray();
+                int i = 0;
+                for (c.moveToFirst(); c.isAfterLast(); c.moveToNext()) {
+                    JSONArray set = new JSONArray();
+                    int id = c.getInt(0);
+                    ids[i++] = id;
+                    set.put(id);
+                    set.put(c.getString(1));
+                    set.put(c.getInt(2));
+                    set.put(c.getInt(3));
+                    set.put(c.getString(4));
+                    JSONArray roles = new JSONArray();
+                    Cursor roleC = mContentResolver.query(uri, new String[]{ID_ROLE_COLUMN},
+                            ID_SET_COLUMN + " = " + id, null, null);
+                    for (roleC.moveToFirst(); roleC.isAfterLast(); roleC.moveToNext()) {
+                        roles.put(roleC.getInt(0));
+                    }
+                    set.put(roles);
+                    sets.put(set);
+                }
+                String jsonString = sets.toString();
+                String setsHtmlString = Html.escapeHtml(jsonString).toString();
+                is = sendPostRequest(target, setsHtmlString);
+            }
+            return ids;
         } finally {
-
+            if(is != null)
+                is.close();
         }
+    }
+
+    private InputStream sendPostRequest(URL target, String jsonData) throws IOException {
+        return null;
     }
 
     //==============================================================================================
     //downloading===================================================================================
 
-    private void downloadChanges(SharedPreferences prefs) {
+    private void downloadChanges(SyncResult syncResult, SharedPreferences prefs, int [] uploadedIDs) throws IOException, JSONException {
         URL target = null;
         InputStream is = null;
         String jsonString = "";
@@ -116,17 +166,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			}
 			Log.d(TAG, "Query to be executed " + query.toString());
             if(query.length() > 0) {
+                if(uploadedIDs != null) {
+
+                }
                 //using raw query to be able to directly use the answer string.
                 db = new LocalDatabaseConnection(getContext()).getWritableDatabase();
                 db.execSQL(query.toString());
             }
 			prefs.edit().putLong(LAST_DOWN_PREF, startTime).commit();
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Malformated url? It is static...", e);
-        } catch (IOException e) {
-            Log.e(TAG, "Error downloading.", e);
-        } catch (JSONException e) {
-            Log.e(TAG, "Error parsing json string: " + jsonString, e);
         } finally {
             if (is != null)
                 try {
