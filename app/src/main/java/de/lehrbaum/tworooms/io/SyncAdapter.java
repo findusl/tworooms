@@ -17,6 +17,8 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -84,20 +86,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 syncResult.stats.numParseExceptions++;
                 return;
             }
+            retries++;
         }
         //If we reach this point there have been to many retries
         syncResult.tooManyRetries = true;
     }
 
     private int [] uploadChanges(SyncResult syncResult, SharedPreferences prefs) throws IOException {
-        String userId = Settings.Secure.ANDROID_ID;
         InputStream is = null;
-        URL target = null;
+        URL target;
         try {
             Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
             Cursor c = mContentResolver.query(uri, null, FROM_SERVER_COLUMN + " = 1", null, PARENT_COLUMN + " ASC");
             int[] ids = new int[c.getCount()];
-            if(c.getCount() > 0) {//if no changed sets do nothing.
+            if(c.getCount() > 0) {//Only do work if sets have changed
                 target = new URL("http", "lehrbaum.de", "twoRoomWriteSQL.php");
                 JSONArray sets = new JSONArray();
                 int i = 0;
@@ -116,13 +118,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     for (roleC.moveToFirst(); roleC.isAfterLast(); roleC.moveToNext()) {
                         roles.put(roleC.getInt(0));
                     }
+                    roleC.close();
                     set.put(roles);
                     sets.put(set);
+                    syncResult.stats.numInserts++;
                 }
                 String jsonString = sets.toString();
-                String setsHtmlString = Html.escapeHtml(jsonString).toString();
+                String setsHtmlString = Html.escapeHtml(jsonString);
+                Log.d(TAG, "Sending jsonData: " + setsHtmlString);
                 is = sendPostRequest(target, setsHtmlString);
             }
+            c.close();
             return ids;
         } finally {
             if(is != null)
@@ -131,16 +137,35 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private InputStream sendPostRequest(URL target, String jsonData) throws IOException {
-        return null;
+        OutputStreamWriter osw = null;
+        StringBuilder data = new StringBuilder();
+        data.append("sets=");
+        data.append(jsonData);
+        data.append("&version=");
+        data.append(LocalDatabaseConnection.DATABASE_VERSION);
+        data.append("&userId=");
+        data.append(Settings.Secure.ANDROID_ID);
+        try {
+            URLConnection conn = target.openConnection();
+            conn.setDoOutput(true);
+            osw = new OutputStreamWriter(conn.getOutputStream());
+            osw.write(data.toString());
+            osw.flush();
+            Log.d(TAG, "The connection: " + conn.toString());
+            return conn.getInputStream();
+        } finally {
+            if(osw != null)
+                osw.close();
+        }
     }
 
     //==============================================================================================
     //downloading===================================================================================
 
     private void downloadChanges(SyncResult syncResult, SharedPreferences prefs, int [] uploadedIDs) throws IOException, JSONException {
-        URL target = null;
+        URL target;
+        String jsonString;
         InputStream is = null;
-        String jsonString = "";
         SQLiteDatabase db = null;
         try {
 			StringBuilder filepath = new StringBuilder("twoRoomsReadSQL.php?v=");
@@ -159,15 +184,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			Log.d(TAG, "JSON string: " + jsonString);
             JSONObject tables = new JSONObject(jsonString);
 			StringBuilder query = new StringBuilder(jsonString.length());
-            for(String table : new II<String>(tables.keys())) {
+            for(String table : new II<>(tables.keys())) {
                 String rows = tables.getString(table);
 				Log.v(TAG, "rows: " + rows);
 				query = createQuery(query, table, rows);
+                syncResult.stats.numInserts++;
 			}
 			Log.d(TAG, "Query to be executed " + query.toString());
             if(query.length() > 0) {
                 if(uploadedIDs != null) {
-
+                    //TODO: delete old ids
                 }
                 //using raw query to be able to directly use the answer string.
                 db = new LocalDatabaseConnection(getContext()).getWritableDatabase();
@@ -179,7 +205,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    Log.w(TAG, "Unable to close inputstream", e);
+                    Log.w(TAG, "Unable to close InputStream", e);
                 }
             if(db != null)
                 db.close();
@@ -207,8 +233,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		return query;
 	}
 
-    public String readIt(InputStream stream) throws IOException, UnsupportedEncodingException {
-        Reader reader = null;
+    public String readIt(InputStream stream) throws IOException {
+        Reader reader;
         reader = new InputStreamReader(stream, "UTF-8");
         char c = (char) reader.read();
         StringBuilder lenSt = new StringBuilder();
