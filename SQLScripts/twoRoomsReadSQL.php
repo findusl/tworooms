@@ -1,7 +1,6 @@
 <?php
 $currentVersion = 3;//is there some way to make constant?
 $version = $_GET['v'];//will version be identifed correctly as an int or even double?
-
 //TODO: when database structure changes make update depending on version.
 
 //echo 'trying to establish connection' . '<br>';
@@ -42,10 +41,10 @@ function echoTable($db, $since, $table, $columns, $intColumns) {
 $resultAsArray = array();
 
 $resultAsArray['categories'] = echoTable($db, $since, 'categories', '_id, name', array(0));
+$resultAsArray['teams'] = echoTable($db, $since, 'teams', '_id, name', array(0));
 $resultAsArray['roles'] = echoTable($db, $since, 'roles', '_id, name, description, team_id, groupe, category', array(0, 3, 4, 5));
 $resultAsArray['sets'] = echoTable($db, $since, 'sets', '_id, name, count, parent, description', array(0, 2, 3));
 $resultAsArray['set_roles'] = echoTable($db, $since, 'set_roles', 'id_set, id_role', array(0, 1));
-$resultAsArray['teams'] = echoTable($db, $since, 'teams', '_id, name', array(0));
 
 //echo 'finished reading tables' . '<br>';
 
