@@ -73,11 +73,10 @@ public class SetListFragment extends ListFragment
         super.onCreate(savedInstanceState);
 
         mAdapter = new SimpleCursorAdapter(getActivity(),
-                android.R.layout.simple_list_item_activated_1, null,
-                new String[] {"name"}, new int[]{android.R.id.text1}, 0);
+                R.layout.list_item_set, null,
+                new String[] {"name", "count"}, new int[]{android.R.id.text1, R.id.counterView}, 0);
         getLoaderManager().initLoader(0, null, this);
         setListAdapter(mAdapter);
-
         setHasOptionsMenu(true);
     }
 
@@ -193,7 +192,7 @@ public class SetListFragment extends ListFragment
 			}
 		}
 		String selectionString = selection.length() > 0 ? selection.toString() : null;
-        return new CursorLoader(getActivity(), uri, new String[]{ID_COLUMN, NAME_COLUMN},
+        return new CursorLoader(getActivity(), uri, new String[]{ID_COLUMN, NAME_COLUMN, COUNT_COLUMN},
 				selectionString, null, null);
     }
 

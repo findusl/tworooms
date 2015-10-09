@@ -79,7 +79,7 @@ public class CategoryRoleListFragment extends RolesListFragment
 					selection = CATEGORY_COLUMN + " = " + args.getLong(ChooseRoleFragment.SELECTION_INDEX);
 				}
 				columns =  new String[]{ID_COLUMN, NAME_COLUMN, TEAM_COLUMN, GROUP_COLUMN};
-				sortOrder = ID_COLUMN + " ASC";
+				sortOrder = orderByClause();
 				break;
 			default:
 				return super.onCreateLoader(id, args);

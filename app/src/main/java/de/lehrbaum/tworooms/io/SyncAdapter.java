@@ -34,7 +34,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = SyncAdapter.class.getSimpleName();
 	private static final String LAST_DOWN_PREF = "last down";
 
-    public static final String SYNC_PREFERENCES = "Sync Preferences";
+    public static final String SQL_PREFERENCES = "sql preferences";
 
     // Define a variable to contain a content resolver instance
     final ContentResolver mContentResolver;
@@ -63,7 +63,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.d(TAG, "on Perform Sync called");
-        SharedPreferences prefs = getContext().getSharedPreferences(SYNC_PREFERENCES, 0);
+        SharedPreferences prefs = getContext().getSharedPreferences(SQL_PREFERENCES, 0);
         int [] ids;
         int retries = 0;
         while(retries < 5) {

@@ -47,7 +47,7 @@ public class CreateSetFragment extends ListFragment {
 
     private long [] mSetRoles;
 
-    private ArrayAdapter<String> mAdapter;
+    private VariationsAdapter mAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,9 +57,7 @@ public class CreateSetFragment extends ListFragment {
 		mVariationNames = new ArrayList<>();
         mSetRoles = new long [] {7, 8};
 
-        mAdapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_activated_1,
-                new ArrayList<String>());
+        mAdapter = new VariationsAdapter();
         setListAdapter(mAdapter);
     }
 
@@ -152,8 +150,10 @@ public class CreateSetFragment extends ListFragment {
 				String name = input.getText().toString();
 				if(name.length() == 0)
 					return;
-				mAdapter.remove(mAdapter.getItem(position));
-				mAdapter.insert(name, position);
+				VariationsEntry entry = mAdapter.getItem(position);
+				mAdapter.remove(entry);
+				entry.name = name;
+				mAdapter.insert(entry, position);
         		mVariationNames.set(position, name);
     		}
 		});
@@ -216,7 +216,10 @@ public class CreateSetFragment extends ListFragment {
         //increment before because starting to count at 1 is more intuitive
         name +=  " v" + (++mAutoIncrementVariation+1);
         mVariationNames.add(name);
-        mAdapter.add(name);
+		VariationsEntry entry = new VariationsEntry();
+		entry.name = name;
+		entry.count = variation.length;
+        mAdapter.add(entry);
         return mVariations.size()-1;
     }
 
@@ -268,6 +271,7 @@ public class CreateSetFragment extends ListFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+		
     }
 
     public interface OnFragmentInteractionListener {
@@ -281,5 +285,35 @@ public class CreateSetFragment extends ListFragment {
         void onFinishSetClick(String name, String description, long [] setRoles,
 							String [] variationNames, long [][] variations);
     }
+	
+	class VariationsEntry {
+		String name;
+		int count;
+	}
 
+	class VariationsAdapter extends ArrayAdapter<VariationsEntry> {
+		LayoutInflater mInflater;
+		VariationsAdapter() {
+			super(getActivity(), R.layout.list_item_set,
+				  new ArrayList<VariationsEntry>());
+			mInflater = LayoutInflater.from(getActivity());
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent)
+		{
+			View v;
+			if (convertView == null) {
+				v = mInflater.inflate(R.layout.list_item_set, parent, false);
+			} else {
+				v = convertView;
+			}
+			VariationsEntry entry = getItem(position);
+			TextView mainText = (TextView) v.findViewById(android.R.id.text1);
+			TextView counterText = (TextView) v.findViewById(R.id.counterView);
+			mainText.setText(entry.name);
+			counterText.setText(entry.count);
+			return v;
+		}
+	}
 }

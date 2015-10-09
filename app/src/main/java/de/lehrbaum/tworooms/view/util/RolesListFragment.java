@@ -14,9 +14,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
+import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import android.view.*;
+import android.content.*;
 
 /**
  * This fragment is able to display the description of a role in a dialog. It will NOT initialize
@@ -34,8 +37,27 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 	protected static final int ROLES_LOADER = 1;
 	protected static final int DESCRIPTION_LOADER = 2;
 
+	protected enum SORT_ORDER {
+		ALPHABETICAL(R.string.menu_sort_Alphabet),
+		GROUP(R.string.menu_sort_group);
+		int text;
+		SORT_ORDER (int text) {
+			this.text = text;
+		}
+		SORT_ORDER next() {
+			switch(this) {
+				case ALPHABETICAL:
+					return GROUP;
+				case GROUP:
+					return ALPHABETICAL;
+			}
+			return null;
+		}
+	}
+
 	private boolean useLongClick = false;
 	protected SimpleCursorAdapter mAdapter;
+	protected SORT_ORDER mSortOrder = SORT_ORDER.GROUP;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -49,6 +71,7 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 				new int[]{android.R.id.text1, android.R.id.text1}, 0);
 		mAdapter.setViewBinder(this);
 		setListAdapter(mAdapter);
+		setHasOptionsMenu(true);
 	}
 
 	@Override
@@ -57,6 +80,9 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 		if(useLongClick)
 			getListView().setOnItemLongClickListener(this);
 	}
+	
+	//==============================================================================================
+	//Setting background color======================================================================
 
 	@Override
 	public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
@@ -103,6 +129,46 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 		return color;
 	}
 
+	//==============================================================================================
+	//Options menu==================================================================================
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+	{
+		inflater.inflate(R.menu.menu_role_list, menu);
+		MenuItem sortItem = menu.findItem(R.id.action_sort);
+		mSortOrder = mSortOrder.next();
+		sortItem.setTitle(mSortOrder.next().text);
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch(item.getItemId()) {
+			case R.id.action_sort:
+				getLoaderManager().restartLoader(ROLES_LOADER, null, this);
+				break;
+			case R.id.action_settings:
+				//React to settings.
+				break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	protected String orderByClause() {
+		switch(mSortOrder) {
+			case GROUP:
+				return GROUP_COLUMN + " ASC";
+			case ALPHABETICAL:
+				return NAME_COLUMN + " ASC";
+		}
+		return ID_COLUMN + " ASC";
+	}
+
+	//==============================================================================================
+	//Loader Callbacks==============================================================================
+
 	private AlertDialog currentDialog;
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -120,14 +186,14 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 			case ROLES_LOADER:
 				uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, ROLES_TABLE);
 				columns = new String[]{ID_COLUMN, NAME_COLUMN, TEAM_COLUMN};
-				sortOrder = ID_COLUMN + " ASC";
+				sortOrder = orderByClause();
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported loader id: " + id);
 		}
 		return new CursorLoader(getActivity(), uri, columns, selection, selArgs, sortOrder);
 	}
-
+	
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		switch (loader.getId()) {
@@ -176,6 +242,10 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 				break;
 		}
 	}
+	
+
+	//==============================================================================================
+	//list Callbacks================================================================================
 
 	protected void setUseLongClick(boolean useLongClick) {
 		this.useLongClick = useLongClick;

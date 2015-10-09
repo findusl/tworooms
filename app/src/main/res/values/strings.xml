@@ -8,6 +8,8 @@
 	<string name="title_dialog_change_name">Enter new name</string>
     <string name="action_settings">Settings</string>
     <string name="menu_set_create">Create set</string>
+    <string name="menu_sort_Alphabet">Sort alphabetically</string>
+    <string name="menu_sort_group">Sort by group</string>
     <string name="hint_set_name">Name of the set</string>
     <string name="hint_search_query">Enter number of players</string>
     <string name="hint_set_desc">Set description</string>
