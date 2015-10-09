@@ -9,9 +9,16 @@ import android.net.Uri;
 import android.util.Log;
 
 import java.util.Locale;
+import android.content.*;
+import java.util.*;
 
 public class DatabaseContentProvider extends ContentProvider {
     private static final String TAG = DatabaseContentProvider.class.getSimpleName();
+	public static final String DATABASE_LANGUAGE_PREF = "lang";
+	
+	private static final String [] supportedLanguages = 
+				new String [] {"de", "en"};
+	private static String mLocale;
 
     protected LocalDatabaseConnection dbConnection;
 
@@ -44,7 +51,22 @@ public class DatabaseContentProvider extends ContentProvider {
         public static final int TEAM_VIOLETT = 6;
         public static final int TEAM_BLACK = 7;
     }
-
+	
+	public static void setPreferredDatabaseLanguage(Context context, String locale) {
+		if(Arrays.binarySearch(supportedLanguages, locale) != -1)
+			mLocale = locale;
+		else
+			mLocale = "en";
+		SharedPreferences prefs = context.getSharedPreferences(SyncAdapter.SQL_PREFERENCES, 0);
+	}
+	
+	public static String getPreferredDatabaseLanguage(Context context) {
+		if(mLocale == null) {
+			SharedPreferences prefs = context.getSharedPreferences(SyncAdapter.SQL_PREFERENCES, 0);
+			mLocale = prefs.getString(DATABASE_LANGUAGE_PREF, "en");
+		}
+		return mLocale;
+	}
 
     @Override
     public boolean onCreate() {
@@ -125,13 +147,12 @@ public class DatabaseContentProvider extends ContentProvider {
     }
 
     private String localize(String table) {
-        //String locale = "_" + Locale.getDefault().getLanguage();
-        String locale = "_en";
         switch(table) {
             case Constants.ROLES_TABLE:
             case Constants.CATEGORIES_TABLE:
             case Constants.TEAMS_TABLE:
-                return table + locale;
+                return table + 
+					getPreferredDatabaseLanguage(getContext());
             default:
                 return table;
         }

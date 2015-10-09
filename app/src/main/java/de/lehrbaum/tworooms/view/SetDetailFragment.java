@@ -64,6 +64,7 @@ public class SetDetailFragment extends RolesListFragment {
 		String [] selArgs = null;
 		String selection = null;
 		String [] columns;
+		String sortOrder = null;
         switch (loaderId) {
             case INFORMATION_LOADER:
                 uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
@@ -75,11 +76,12 @@ public class SetDetailFragment extends RolesListFragment {
 				columns = new String[]{ID_COLUMN, NAME_COLUMN, TEAM_COLUMN};
 				selection = DatabaseContentProvider.Constants.SET_ROLE_SELECTION;
 				selArgs = new String[]{Integer.toString(setId)};
+				sortOrder = orderByClause();
 				break;
             default:
 				return super.onCreateLoader(loaderId, bundle);
         }
-		return new CursorLoader(getActivity(), uri, columns, selection, selArgs, null);
+		return new CursorLoader(getActivity(), uri, columns, selection, selArgs, sortOrder);
     }
 
     @Override
