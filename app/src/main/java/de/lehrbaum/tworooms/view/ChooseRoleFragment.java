@@ -33,7 +33,7 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ChooseRoleFragment extends CategoryRoleListFragment {
+public final class ChooseRoleFragment extends CategoryRoleListFragment {
     private static final String TAG = ChooseRoleFragment.class.getSimpleName();
 
     public static final String SELECTION_INDEX = "sel_index";

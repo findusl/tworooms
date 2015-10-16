@@ -11,10 +11,12 @@ import java.util.Arrays;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import de.lehrbaum.tworooms.view.util.BaseActivity;
+
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 import android.widget.*;
 
-public class CreateSetActivity extends Activity implements CreateSetFragment.OnFragmentInteractionListener
+public final class CreateSetActivity extends BaseActivity implements CreateSetFragment.OnFragmentInteractionListener
 {
     private static final String TAG = CreateSetActivity.class.getSimpleName();
     public static final String RESULT_SET_ID = "resultSetId";
@@ -29,7 +31,6 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "on create");
         setContentView(R.layout.activity_create_set);
 
         mFragment = ((CreateSetFragment) getFragmentManager()
@@ -95,7 +96,6 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
     protected final void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK) {
             long [] selection = data.getLongArrayExtra(ChooseRoleFragment.SELECTION_INDEX);
-			Log.d(TAG, "Result ok. selection: " + Arrays.toString(selection));
 			mFragment.setRoles(requestCode, selection);
         }
     }
@@ -103,7 +103,6 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
     @Override
     public void onFinishSetClick(String name, String description, long[] setRoles, 
 								String [] variationNames, long[][] variations) {
-        Log.d(TAG, "Finish Set clicked");
 		if(name == null || name.length() == 0) {
 			Toast.makeText(this, R.string.error_set_name, Toast.LENGTH_SHORT).show();
 			return;
@@ -112,7 +111,9 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
             Toast.makeText(this, R.string.error_set_roles, Toast.LENGTH_SHORT).show();
             return;
         }
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
+        Log.v(TAG, "Finish Set clicked. roles: " + Arrays.toString(setRoles) + " names: " +
+                Arrays.toString(variationNames) + " variations: " + Arrays.toString(variations));
+        Uri uri = Uri.withAppendedPath(CONTENT_URI, SETS_TABLE);
         ArrayList<ContentValues> roleInserts = new ArrayList<>((setRoles.length)*(variations.length + 1));
         ContentValues values = new ContentValues(3);
         values.put(NAME_COLUMN, name);
@@ -120,7 +121,6 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
         values.put(COUNT_COLUMN, setRoles.length);
         Uri parentUri = getContentResolver().insert(uri, values);
         long parent = Long.parseLong(parentUri.getLastPathSegment());
-        Log.d(TAG, "Parent: " + parent);
         for(long l : setRoles) {
             values = new ContentValues(2);
             values.put(ID_SET_COLUMN, parent);
@@ -143,7 +143,7 @@ public class CreateSetActivity extends Activity implements CreateSetFragment.OnF
                 roleInserts.add(values);
             }
         }
-        uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SET_ROLES_TABLE);
+        uri = Uri.withAppendedPath(CONTENT_URI, SET_ROLES_TABLE);
         ContentValues [] roleInsertsArray = roleInserts.toArray(new ContentValues[roleInserts.size()]);
         getContentResolver().bulkInsert(uri, roleInsertsArray);
         Intent result = new Intent();

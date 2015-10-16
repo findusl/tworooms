@@ -19,7 +19,6 @@ import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 import android.view.*;
-import android.content.*;
 
 /**
  * This fragment is able to display the description of a role in a dialog. It will NOT initialize
@@ -55,7 +54,7 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 		}
 	}
 
-	private boolean useLongClick = false;
+	private boolean mUseLongClick = false;
 	protected SimpleCursorAdapter mAdapter;
 	protected SORT_ORDER mSortOrder = SORT_ORDER.GROUP;
 
@@ -77,7 +76,7 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		if(useLongClick)
+		if(mUseLongClick)
 			getListView().setOnItemLongClickListener(this);
 	}
 	
@@ -136,10 +135,14 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 	{
 		inflater.inflate(R.menu.menu_role_list, menu);
-		MenuItem sortItem = menu.findItem(R.id.action_sort);
-		mSortOrder = mSortOrder.next();
-		sortItem.setTitle(mSortOrder.next().text);
 		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+        MenuItem sortItem = menu.findItem(R.id.action_sort);
+        sortItem.setTitle(mSortOrder.next().text);
+		super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
@@ -147,10 +150,8 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 	{
 		switch(item.getItemId()) {
 			case R.id.action_sort:
+                mSortOrder = mSortOrder.next();
 				getLoaderManager().restartLoader(ROLES_LOADER, null, this);
-				break;
-			case R.id.action_settings:
-				//React to settings.
 				break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -248,12 +249,12 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 	//list Callbacks================================================================================
 
 	protected void setUseLongClick(boolean useLongClick) {
-		this.useLongClick = useLongClick;
+		this.mUseLongClick = useLongClick;
 	}
 
 	@Override
 	public final boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-		if(useLongClick) {
+		if(mUseLongClick) {
 			descriptionClicked(id);
 			return true;
 		} else
@@ -262,7 +263,7 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		if(!useLongClick)
+		if(!mUseLongClick)
 			descriptionClicked(id);
 	}
 

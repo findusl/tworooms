@@ -3,9 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="de.lehrbaum.tworooms.view.SetListFragments">
 
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" />
-
     <item android:id="@+id/action_roles" android:title="@string/action_roles"
           android:orderInCategory="2" android:showAsAction="ifRoom"
           android:icon="@android:drawable/ic_menu_my_calendar"/>

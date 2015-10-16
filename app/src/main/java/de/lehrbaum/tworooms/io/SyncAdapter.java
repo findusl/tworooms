@@ -2,10 +2,13 @@ package de.lehrbaum.tworooms.io;
 
 import android.accounts.Account;
 import android.content.*;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
@@ -21,10 +24,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 
@@ -32,11 +32,11 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
  * Handle the transfer of data between a server and an
  * app, using the Android sync adapter framework.
  */
-public class SyncAdapter extends AbstractThreadedSyncAdapter {
+public final class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = SyncAdapter.class.getSimpleName();
 	private static final String LAST_DOWN_PREF = "last down";
 
-    public static final String SQL_PREFERENCES = "sql preferences";
+    public static ContentObserver SYNC_OBSERVER;
 
     // Define a variable to contain a content resolver instance
     final ContentResolver mContentResolver;
@@ -65,74 +65,97 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.d(TAG, "on Perform Sync called");
-        SharedPreferences prefs = getContext().getSharedPreferences(SQL_PREFERENCES, 0);
-        int [] ids;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         int retries = 0;
-        while(retries < 5) {
-            try {
-                //TODO: set numInsertions etc in syncResult correctly
-                ids = uploadChanges(syncResult, prefs);
-                downloadChanges(syncResult, prefs, ids);
-                return;
-            } catch (MalformedURLException e) {
-                Log.e(TAG, "Malformed url? How can that be with a static URL?", e);
-                syncResult.stats.numParseExceptions++;
-                return;
-            } catch (IOException e) {
-                Log.w(TAG, "Problem sending. Probably just network error.", e);
-                syncResult.stats.numIoExceptions++;
-            } catch (JSONException e) {
-                Log.e(TAG, "Problem with the JSON from the server.", e);
-                syncResult.stats.numParseExceptions++;
-                return;
+        SQLiteDatabase db = new LocalDatabaseConnection(getContext()).getWritableDatabase();
+        try {//outer try to close database
+            while (retries < 5) {
+                try {//inner try to retry up/download
+                    //wish: set numInsertions etc in syncResult correctly
+                    uploadChanges(syncResult, db);
+                    downloadChanges(syncResult, prefs, db);
+                    return;
+                } catch (MalformedURLException e) {
+                    Log.e(TAG, "Malformed url? How can that be with a static URL?", e);
+                    syncResult.stats.numParseExceptions++;
+                    return;
+                } catch (IOException e) {
+                    Log.w(TAG, "Problem sending. Probably just network error.", e);
+                    syncResult.stats.numIoExceptions++;
+                } catch (JSONException e) {
+                    Log.e(TAG, "Problem with the JSON from the server.", e);
+                    syncResult.stats.numParseExceptions++;
+                    return;
+                } catch (SQLiteException e) {
+                    Log.e(TAG, "Problem with the database.", e);
+                    syncResult.stats.numParseExceptions++;
+                    return;
+                }
+                retries++;
             }
-            retries++;
+        } finally {
+            if (syncResult.madeSomeProgress())
+                getContext().getContentResolver().notifyChange(CONTENT_URI, SYNC_OBSERVER);
+            closeHelper(db);
         }
         //If we reach this point there have been to many retries
         syncResult.tooManyRetries = true;
     }
 
-    private int [] uploadChanges(SyncResult syncResult, SharedPreferences prefs) throws IOException {
+    private void uploadChanges(SyncResult syncResult, SQLiteDatabase db) throws IOException {
         InputStream is = null;
         URL target;
+        Cursor c = null;
+        Cursor roleC = null;
         try {
-            Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
-            Cursor c = mContentResolver.query(uri, null, FROM_SERVER_COLUMN + " = 1", null, PARENT_COLUMN + " ASC");
-            int[] ids = new int[c.getCount()];
+            c = db.query(SETS_TABLE, null, FROM_SERVER_COLUMN + " = 0", null, null, null, PARENT_COLUMN + " ASC");
             if(c.getCount() > 0) {//Only do work if sets have changed
-                target = new URL("http", "lehrbaum.de", "twoRoomWriteSQL.php");
+                target = new URL("http", "lehrbaum.de", "twoRoomsWriteSQL.php");
                 JSONArray sets = new JSONArray();
                 int i = 0;
-                for (c.moveToFirst(); c.isAfterLast(); c.moveToNext()) {
+                for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                     JSONArray set = new JSONArray();
                     int id = c.getInt(0);
-                    ids[i++] = id;
                     set.put(id);
                     set.put(c.getString(1));
                     set.put(c.getInt(2));
                     set.put(c.getInt(3));
                     set.put(c.getString(4));
                     JSONArray roles = new JSONArray();
-                    Cursor roleC = mContentResolver.query(uri, new String[]{ID_ROLE_COLUMN},
-                            ID_SET_COLUMN + " = " + id, null, null);
-                    for (roleC.moveToFirst(); roleC.isAfterLast(); roleC.moveToNext()) {
+                    roleC = db.query(SET_ROLES_TABLE, new String[]{ID_ROLE_COLUMN},
+                            ID_SET_COLUMN + " = " + id, null, null, null, null);
+                    for (roleC.moveToFirst(); !roleC.isAfterLast(); roleC.moveToNext()) {
                         roles.put(roleC.getInt(0));
                     }
                     roleC.close();
                     set.put(roles);
                     sets.put(set);
-                    syncResult.stats.numInserts++;
                 }
                 String jsonString = sets.toString();
                 String setsHtmlString = Html.escapeHtml(jsonString);
                 Log.d(TAG, "Sending jsonData: " + setsHtmlString);
-                is = sendPostRequest(target, setsHtmlString);
+                //still have to encode for the url:
+                String setsURLString = URLEncoder.encode(setsHtmlString, "utf-8");
+                is = sendPostRequest(target, setsURLString);
+                copy(is, System.out);
+                System.out.println();
+                //after successfull sending, delete the entries from the database
+                db.delete(SETS_TABLE, FROM_SERVER_COLUMN + "=0", null);
+                syncResult.stats.numInserts++;
             }
             c.close();
-            return ids;
         } finally {
-            if(is != null)
-                is.close();
+            closeHelper(is);
+            closeHelper(c);
+            closeHelper(roleC);
+        }
+    }
+
+    private void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[128];
+        int len;
+        while ((len = in.read(buffer)) != -1) {
+            out.write(buffer, 0, len);
         }
     }
 
@@ -151,7 +174,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             osw = new OutputStreamWriter(conn.getOutputStream());
             osw.write(data.toString());
             osw.flush();
-            Log.d(TAG, "The connection: " + conn.toString());
             return conn.getInputStream();
         } finally {
             if(osw != null)
@@ -162,76 +184,64 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     //==============================================================================================
     //downloading===================================================================================
 
-    private void downloadChanges(SyncResult syncResult, SharedPreferences prefs, int [] uploadedIDs) throws IOException, JSONException {
+    private void downloadChanges(SyncResult syncResult, SharedPreferences prefs, SQLiteDatabase db) throws IOException, JSONException {
         URL target;
         String jsonString;
         InputStream is = null;
-        SQLiteDatabase db = null;
         try {
 			StringBuilder filepath = new StringBuilder("twoRoomsReadSQL.php?v=");
 			filepath.append(LocalDatabaseConnection.DATABASE_VERSION);
 			filepath.append("&since=");
-			long lastTime = prefs.getLong(LAST_DOWN_PREF, 0);
+			long lastTime = prefs.getLong(LAST_DOWN_PREF, LocalDatabaseConnection.DATABASE_SINCE);
 			filepath.append(lastTime);
             target = new URL("http", "lehrbaum.de", filepath.toString());
 			Log.d(TAG, "Target URL: " + target.toExternalForm());
             is = target.openStream();
-            String htmlString = readIt(is);
-			int timeEnd = htmlString.indexOf('{');
-			long startTime = Long.parseLong(htmlString.substring(5, timeEnd));
-			Log.d(TAG, "Start time: " + startTime);
-			jsonString = Html.fromHtml(htmlString.substring(timeEnd)).toString();
-			Log.d(TAG, "JSON string: " + jsonString);
-            JSONObject tables = new JSONObject(jsonString);
-			StringBuilder query = new StringBuilder(jsonString.length());
-            for(String table : new II<>(tables.keys())) {
-                String rows = tables.getString(table);
+            jsonString = Html.fromHtml(readIt(is)).toString();
+            Log.d(TAG, "Json string: " + jsonString);
+            JSONObject data = new JSONObject(jsonString);
+            for(String table : new II<>(data.keys())) {
+                if(table.equals("time"))
+                    continue;//omit the time key
+                JSONArray rows = data.getJSONArray(table);
 				Log.v(TAG, "rows: " + rows);
-				query = createQuery(query, table, rows);
-                syncResult.stats.numInserts++;
+                insertInformation(db, table, rows, syncResult);
 			}
-			Log.d(TAG, "Query to be executed " + query.toString());
-            if(query.length() > 0) {
-                if(uploadedIDs != null) {
-                    //TODO: delete old ids
-                }
-                //using raw query to be able to directly use the answer string.
-                db = new LocalDatabaseConnection(getContext()).getWritableDatabase();
-                db.execSQL(query.toString());
-            }
+            int startTime = data.getInt("time");
+            Log.d(TAG, "Start time: " + startTime);
 			prefs.edit().putLong(LAST_DOWN_PREF, startTime).commit();
         } finally {
-            if (is != null)
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    Log.w(TAG, "Unable to close InputStream", e);
-                }
-            if(db != null)
-                db.close();
+            closeHelper(is);
         }
     }
 
-    private StringBuilder createQuery(StringBuilder query, String table, String values) {
-		if(values.length() < 3)
-			return query;
-		query = query.append("INSERT OR REPLACE INTO ");
-		query.append(table);
-		query.append(" VALUES ");
-		int offset = query.length();
-		query.append(values);
-        //delete first and last bracket []
-		query.deleteCharAt(offset).deleteCharAt(query.length() - 1);
-		for(int i = offset; i < query.length(); i++) {
-			char c = query.charAt(i);
-			if(c == '[')
-				query.setCharAt(i, '(');
-			else if(c == ']')
-				query.setCharAt(i, ')');
-		}
-		query.append(";");
-		return query;
-	}
+    private void insertInformation(SQLiteDatabase db, String table, JSONArray rows,
+                                   SyncResult syncResult)
+            throws SQLiteException, JSONException {
+        if(rows.length() == 0)
+            return;//no rows to insert
+        boolean setsTable = table.equals(SETS_TABLE);
+        StringBuilder query = new StringBuilder(30 + table.length() + rows.length()*10);
+        query = query.append("INSERT OR REPLACE INTO ");
+        query.append(table);
+        query.append(" VALUES ");
+        for(int i = 0; i < rows.length(); i++) {
+            String values = rows.getString(i);
+            int offset = query.length();
+            query.append(values);
+            query.replace(offset, offset + 1, "(");
+            if(setsTable) {
+                query.replace(query.length() - 1, query.length(), ",");
+                query.append(" 1)");
+            } else
+                query.replace(query.length() - 1, query.length(), ")");
+            query.append(',');
+            syncResult.stats.numInserts++;
+        }
+        query.replace(query.length()-1, query.length(), ";");
+        Log.d(TAG, "Sql to be executed: " + query.toString());
+        db.execSQL(query.toString());
+    }
 
     public String readIt(InputStream stream) throws IOException {
         Reader reader;
@@ -249,6 +259,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         if(read < len-1)
             Log.w(TAG, "Read only " + read + " bytes when expecting " + (len-1) + " bytes.");
         return new String(buffer);
+    }
+
+    /**
+     * Closes the closeable and catches any exceptions while writing them to the warn log.
+     * @param c The closeable to close. May be NULL.
+     */
+    private void closeHelper(Closeable c) {
+        if (c != null)
+            try {
+                c.close();
+            } catch (Exception e) {
+                Log.w(TAG, e);
+            }
     }
 
     public static class II<T> implements Iterable<T> {

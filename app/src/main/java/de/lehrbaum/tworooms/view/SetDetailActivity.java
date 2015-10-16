@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import de.lehrbaum.tworooms.R;
+import de.lehrbaum.tworooms.view.util.BaseActivity;
 
 
 /**
@@ -17,7 +18,7 @@ import de.lehrbaum.tworooms.R;
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link SetDetailFragment}.
  */
-public class SetDetailActivity extends Activity {
+public final class SetDetailActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

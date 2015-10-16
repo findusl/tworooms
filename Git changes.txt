@@ -1,0 +1,8 @@
+Working on sync
+
+Fixed downloading and uploading of sync process.
+Locked database during sync.
+Added correct Contentobserver for sync.
+Added some final for performance.
+Added settings for setting the language of the descriptions and role names.
+Added count for number of roles

@@ -6,20 +6,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
+import android.widget.CursorAdapter;
 
 import de.lehrbaum.tworooms.R;
 
 /**
- * Created by Sebastian on 26.09.2015.
+ * This is a cursor adapter that adds an empty entry for the user to select none of the other options.
+ * This is useful for Spinner that always have a element selected. This way the user can select no
+ * element in an easy way.
+ *
+ * @author Sebastian Lehrbaum
  */
-public class NoneCursorAdapter extends SimpleCursorAdapter {
+public final class NoneCursorAdapter extends SimpleCursorAdapter {
 	private final String mNoFilterString;
 	private final Context mContext;
 	private final Cursor mCursor;
 	/**
-	 * Standard constructor.
+	 * Standard constructor. The element for no selection is named 'no filter'.
 	 *
 	 * @param context The context where the ListView associated with this
 	 *                SimpleListItemFactory is running

@@ -10,9 +10,10 @@ import android.view.MenuItem;
 import java.util.Arrays;
 
 import de.lehrbaum.tworooms.R;
+import de.lehrbaum.tworooms.view.util.BaseActivity;
 
 
-public class ChooseRoleActivity extends Activity {
+public final class ChooseRoleActivity extends BaseActivity {
 
     private static final String TAG = ChooseRoleActivity.class.getSimpleName();
 

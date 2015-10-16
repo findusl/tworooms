@@ -6,17 +6,18 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.Authenticator;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 import de.lehrbaum.tworooms.io.SyncAdapter;
+import de.lehrbaum.tworooms.view.util.BaseActivity;
+
+import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 
 
 /**
@@ -35,7 +36,7 @@ import de.lehrbaum.tworooms.io.SyncAdapter;
  * {@link SetListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class SetListActivity extends Activity
+public final class SetListActivity extends BaseActivity
         implements SetListFragment.Callbacks {
     private static final String TAG = SetListActivity.class.getSimpleName();
 
@@ -78,39 +79,41 @@ public class SetListActivity extends Activity
         AccountManager accountManager =
                 (AccountManager) getSystemService(
                         ACCOUNT_SERVICE);
-        boolean firstTime = accountManager.addAccountExplicitly(accountInstance, null, null);
-
+        final boolean firstTime = accountManager.addAccountExplicitly(accountInstance, null, null);
         ContentResolver.addPeriodicSync(accountInstance, authority,
                 Bundle.EMPTY, /* 5 hours interval */5 * 60 * 60);
 
-        Runnable onChange = new Runnable() {
+        SyncAdapter.SYNC_OBSERVER = new ContentObserver(new Handler(getMainLooper())) {
             @Override
-            public void run() {
+            public boolean deliverSelfNotifications() {
+                return false;
+            }
+
+            @Override
+            public void onChange(boolean selfChange) {
+                Log.i(TAG, "On change for sync called. self change: " + selfChange);
                 ContentResolver.requestSync(accountInstance, authority, Bundle.EMPTY);
             }
         };
-        ContentResolver resolver = getContentResolver();
-        Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "votes");
-        resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));
-        uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, "sets");
-        resolver.registerContentObserver(uri, true, new DatabaseContentProvider.TableObserver(onChange));
+        final ContentResolver resolver = getContentResolver();
+        Uri uri = Uri.withAppendedPath(CONTENT_URI, VOTES_TABLE);
+        resolver.registerContentObserver(uri, true, SyncAdapter.SYNC_OBSERVER);
+        uri = Uri.withAppendedPath(CONTENT_URI, SETS_TABLE);
+        resolver.registerContentObserver(uri, true, SyncAdapter.SYNC_OBSERVER);
 
         if(firstTime) {
+            //set sync enabled by default
+            ContentResolver.setSyncAutomatically(accountInstance, authority, true);
             //request a sync
-            Bundle settingsBundle = new Bundle();
+            final Bundle settingsBundle = new Bundle();
             settingsBundle.putBoolean(
                     ContentResolver.SYNC_EXTRAS_MANUAL, true);
             ContentResolver.requestSync(accountInstance, authority, settingsBundle);
         }
     }
 
-    /**
-     * Callback method from {@link SetListFragment.Callbacks}
-     * indicating that the item with the given ID was selected.
-     * @param id
-     */
     @Override
-    public void onItemSelected(int id) {
+    public void onItemSelected(final int id) {
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
