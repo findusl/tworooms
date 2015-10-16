@@ -30,4 +30,10 @@
     <string name="account_name" translatable="false">TwoRoomsSync</string>
     <string name="account_authority" translatable="false">de.lehrbaum.tworooms.database</string>
     <string name="account_type" translatable="false">de.lehrbaum.tworooms</string>
+    <string name="pref_language">Language of roles/descriptions</string>
+    <string name="pref_choose_lang">Choose one of the supported languages.</string>
+    <string name="pref_default_lang" translatable="false">en</string>
+    <string name="pref_lang_en">English</string>
+    <string name="pref_lang_de">German</string>
+    <string name="title_activity_settings">Settings</string>
 </resources>

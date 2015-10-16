@@ -26,7 +26,7 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
  * in two-pane mode (on tablets) or a {@link SetDetailActivity}
  * on handsets.
  */
-public class SetDetailFragment extends RolesListFragment {
+public final class SetDetailFragment extends RolesListFragment {
 
     private static final String TAG = SetDetailFragment.class.getSimpleName();
     /**
@@ -37,11 +37,14 @@ public class SetDetailFragment extends RolesListFragment {
 
     private static final int INFORMATION_LOADER = 0;
 
+    private int mSetId;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-		getLoaderManager().initLoader(ROLES_LOADER, getArguments(), this);
+        mSetId = getArguments().getInt(ARG_SET_ID, Integer.MIN_VALUE);
+		getLoaderManager().initLoader(ROLES_LOADER, null, this);
     }
 
     @Override
@@ -59,7 +62,6 @@ public class SetDetailFragment extends RolesListFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
-        int setId = bundle.getInt(ARG_SET_ID, Integer.MIN_VALUE);
         Uri uri;
 		String [] selArgs = null;
 		String selection = null;
@@ -68,14 +70,14 @@ public class SetDetailFragment extends RolesListFragment {
         switch (loaderId) {
             case INFORMATION_LOADER:
                 uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
-				columns = new String[]{NAME_COLUMN, DESCRIPTION_COLUMN};
-				selection = ID_COLUMN + " = " + setId;
+				columns = new String[]{NAME_COLUMN, DESCRIPTION_COLUMN, COUNT_COLUMN};
+				selection = ID_COLUMN + " = " + mSetId;
 				break;
             case ROLES_LOADER:
                 uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, ROLES_TABLE);
 				columns = new String[]{ID_COLUMN, NAME_COLUMN, TEAM_COLUMN};
 				selection = DatabaseContentProvider.Constants.SET_ROLE_SELECTION;
-				selArgs = new String[]{Integer.toString(setId)};
+				selArgs = new String[]{Integer.toString(mSetId)};
 				sortOrder = orderByClause();
 				break;
             default:
@@ -86,7 +88,6 @@ public class SetDetailFragment extends RolesListFragment {
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.d(TAG, "Cursor count: " + data.getCount());
         switch(loader.getId()) {
             case INFORMATION_LOADER:
                 if(!isVisible())
@@ -100,6 +101,10 @@ public class SetDetailFragment extends RolesListFragment {
                 String desc = data.getString(1);
                 TextView descView = (TextView) getView().findViewById(R.id.desc_view);
                 descView.setText(desc);
+
+                int count = data.getInt(2);
+                TextView countView = (TextView) getView().findViewById(R.id.count_view);
+                countView.setText(Integer.toString(count));
                 break;
 			default:
 				super.onLoadFinished(loader, data);

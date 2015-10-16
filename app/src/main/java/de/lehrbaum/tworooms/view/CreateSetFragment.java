@@ -28,7 +28,7 @@ import android.text.*;
 import android.content.*;
 
 
-public class CreateSetFragment extends ListFragment {
+public  final class CreateSetFragment extends ListFragment {
     private static final String TAG = CreateSetFragment.class.getSimpleName();
 	private static final int REQUEST_SET = Integer.MAX_VALUE - 1;
 	private static final int REQUEST_NEW_VARIATION = Integer.MAX_VALUE - 2;
@@ -39,6 +39,7 @@ public class CreateSetFragment extends ListFragment {
 
 	private TextView mNameView;
     private Button mChangeSetButton;
+    private boolean mActivateOnItemClick = false;
 
     private List<long []> mVariations;
 	/** Need extra counter in case of deleting variations. */
@@ -55,7 +56,7 @@ public class CreateSetFragment extends ListFragment {
 
         mVariations = new ArrayList<>();
 		mVariationNames = new ArrayList<>();
-        mSetRoles = new long [] {7, 8};
+        mSetRoles = new long [] {1, 2};
 
         mAdapter = new VariationsAdapter();
         setListAdapter(mAdapter);
@@ -179,7 +180,8 @@ public class CreateSetFragment extends ListFragment {
         new Handler(getActivity().getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                mChangeSetButton.setPressed(true);
+                if(mActivateOnItemClick)
+                    mChangeSetButton.setPressed(true);
             }
         });
     }
@@ -232,7 +234,6 @@ public class CreateSetFragment extends ListFragment {
      * @return If <CODE>true</CODE> is returned the
      */
     public boolean setRoles(int id, long [] selections) {
-        Log.v(TAG, "Set roles called");
         switch (id) {
             case REQUEST_SET:
                 mSetRoles = selections;
@@ -253,6 +254,7 @@ public class CreateSetFragment extends ListFragment {
     public void setActivateOnItemClick() {
         // When setting CHOICE_MODE_SINGLE, ListView will automatically
         // give items the 'activated' state when touched.
+        mActivateOnItemClick = true;
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
 
@@ -312,7 +314,7 @@ public class CreateSetFragment extends ListFragment {
 			TextView mainText = (TextView) v.findViewById(android.R.id.text1);
 			TextView counterText = (TextView) v.findViewById(R.id.counterView);
 			mainText.setText(entry.name);
-			counterText.setText(entry.count);
+			counterText.setText(Integer.toString(entry.count));
 			return v;
 		}
 	}

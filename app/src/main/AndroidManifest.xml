@@ -33,10 +33,16 @@
             android:label="@string/title_activity_create_set"
             android:parentActivityName=".view.SetListActivity" >
         </activity>
+
         <activity
             android:name=".view.ChooseRoleActivity"
             android:label="@string/title_activity_choose_role"
             android:parentActivityName=".view.ChooseRoleActivity" >
+        </activity>
+
+        <activity
+            android:name=".view.AppPreferenceActivity"
+            android:label="@string/title_activity_settings" >
         </activity>
 
         <provider

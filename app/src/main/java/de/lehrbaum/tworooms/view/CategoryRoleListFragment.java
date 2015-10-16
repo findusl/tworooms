@@ -31,6 +31,8 @@ public class CategoryRoleListFragment extends RolesListFragment
 
 	protected CursorAdapter mSpinnerAdapter;
 
+	private int mSelectedCategory = -1;//standard is no selected category.
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -75,8 +77,8 @@ public class CategoryRoleListFragment extends RolesListFragment
 				break;
 			case ROLES_LOADER:
 				uri = Uri.withAppendedPath(CONTENT_URI, ROLES_TABLE);
-				if(args != null && args.size() == 1) {
-					selection = CATEGORY_COLUMN + " = " + args.getLong(ChooseRoleFragment.SELECTION_INDEX);
+				if(mSelectedCategory != -1) {
+					selection = CATEGORY_COLUMN + " = " + mSelectedCategory;
 				}
 				columns =  new String[]{ID_COLUMN, NAME_COLUMN, TEAM_COLUMN, GROUP_COLUMN};
 				sortOrder = orderByClause();
@@ -114,14 +116,14 @@ public class CategoryRoleListFragment extends RolesListFragment
 		if(id == -1)
 			onNothingSelected(parent);
 		else {
-			Bundle args = new Bundle();
-			args.putLong(ChooseRoleFragment.SELECTION_INDEX, id);
-			getLoaderManager().restartLoader(1, args, this);
+            mSelectedCategory = (int) id;
+			getLoaderManager().restartLoader(1, null, this);
 		}
 	}
 
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
+        mSelectedCategory = -1;
 		getLoaderManager().restartLoader(1, null, this);
 	}
 }

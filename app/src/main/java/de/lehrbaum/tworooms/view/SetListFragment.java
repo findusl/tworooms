@@ -22,11 +22,9 @@ import android.widget.*;
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
-import android.view.ContextMenu.*;
+
 import android.view.*;
 import android.widget.AdapterView.*;
-
-import org.w3c.dom.Text;
 
 /**
  * A list fragment representing a list of sets. This fragment
@@ -37,7 +35,7 @@ import org.w3c.dom.Text;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class SetListFragment extends ListFragment
+public final class SetListFragment extends ListFragment
 		implements LoaderManager.LoaderCallbacks<Cursor>, TextWatcher{
     private static final String TAG = SetListFragment.class.getSimpleName();
 	private static final String SEL_COUNT = COUNT_COLUMN;
@@ -115,9 +113,6 @@ public class SetListFragment extends ListFragment
                 Intent createIntent = new Intent(this.getActivity(), CreateSetActivity.class);
                 startActivity(createIntent);
                 return true;
-			case R.id.action_settings:
-				Toast.makeText(getActivity(), R.string.warning_no_settings, Toast.LENGTH_LONG).show();
-				return true;
 			case R.id.action_roles:
 				Intent rolesIntent = new Intent(this.getActivity(), RoleListActivity.class);
 				startActivity(rolesIntent);

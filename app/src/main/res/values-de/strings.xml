@@ -27,4 +27,9 @@
     <string name="title_set_detail">Details des Sets</string>
     <string name="warning_change_set">Bestehende Variationen werden nicht geändert.</string>
     <string name="default_new_variation">Set variation</string>
+    <string name="pref_choose_lang">Wählen sie eine der möglichen Sprachen aus.</string>
+    <string name="pref_lang_de">Deutsch</string>
+    <string name="pref_lang_en">Englisch</string>
+    <string name="pref_language">Sprache für Rollen-Namen/Beschreibungen</string>
+    <string name="title_activity_settings">Einstellungen</string>
 </resources>

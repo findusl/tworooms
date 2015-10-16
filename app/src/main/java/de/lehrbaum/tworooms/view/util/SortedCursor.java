@@ -7,15 +7,21 @@ import android.util.SparseBooleanArray;
 import java.util.Arrays;
 
 /**
- * Created by Sebastian on 26.09.2015.
+ * This class sorts a cursor in a way that specific elements are at the front and the others are
+ * behind them. The internal sort order does not get changed.
+ *
+ * @author Sebastian Lehrbaum
  */
-public class SortedCursor extends CursorWrapper {
+public final class SortedCursor extends CursorWrapper {
 
 	protected int [] mPositionMapping;
 	protected Cursor mCursor;
 
 	/**
-	 * Creates a new sorted cursor that sorts specific elements to the top of the cursor.
+	 * Creates a new sorted cursor with no changes to the cursor so far.
+     *
+     * Important: You have to call @link{#setSelected} before using this cursor!
+     * Otherwise an exception will be thrown.
 	 *
 	 * @param cursor The underlying cursor to wrap.
 	 */
@@ -24,6 +30,13 @@ public class SortedCursor extends CursorWrapper {
 		mCursor = cursor;
 	}
 
+    /**
+     * Call this to change the elements that should be sorted to the front of the cursor.
+     *
+     * @param selections The elements that should be sorted to the front of the cursor.
+     * @return The number of elements of <code>selections</code> that have been found in the cursor
+     *          and sorted to the front.
+     */
 	public int setSelected(SparseBooleanArray selections) {
 		int size = mCursor.getCount();
 		mPositionMapping = new int [size];
