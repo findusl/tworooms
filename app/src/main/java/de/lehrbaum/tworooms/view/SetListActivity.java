@@ -80,8 +80,18 @@ public final class SetListActivity extends BaseActivity
                 (AccountManager) getSystemService(
                         ACCOUNT_SERVICE);
         final boolean firstTime = accountManager.addAccountExplicitly(accountInstance, null, null);
-        ContentResolver.addPeriodicSync(accountInstance, authority,
-                Bundle.EMPTY, /* 5 hours interval */5 * 60 * 60);
+
+        if(firstTime) {
+            //set sync enabled by default
+            ContentResolver.setSyncAutomatically(accountInstance, authority, true);
+            ContentResolver.addPeriodicSync(accountInstance, authority,
+                    Bundle.EMPTY, /* 5 hours interval */5 * 60 * 60);
+            //request a sync
+            final Bundle settingsBundle = new Bundle();
+            settingsBundle.putBoolean(
+                    ContentResolver.SYNC_EXTRAS_MANUAL, true);
+            ContentResolver.requestSync(accountInstance, authority, settingsBundle);
+        }
 
         SyncAdapter.SYNC_OBSERVER = new ContentObserver(new Handler(getMainLooper())) {
             @Override
@@ -100,16 +110,6 @@ public final class SetListActivity extends BaseActivity
         resolver.registerContentObserver(uri, true, SyncAdapter.SYNC_OBSERVER);
         uri = Uri.withAppendedPath(CONTENT_URI, SETS_TABLE);
         resolver.registerContentObserver(uri, true, SyncAdapter.SYNC_OBSERVER);
-
-        if(firstTime) {
-            //set sync enabled by default
-            ContentResolver.setSyncAutomatically(accountInstance, authority, true);
-            //request a sync
-            final Bundle settingsBundle = new Bundle();
-            settingsBundle.putBoolean(
-                    ContentResolver.SYNC_EXTRAS_MANUAL, true);
-            ContentResolver.requestSync(accountInstance, authority, settingsBundle);
-        }
     }
 
     @Override

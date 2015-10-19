@@ -94,9 +94,11 @@ public final class SyncAdapter extends AbstractThreadedSyncAdapter {
                 retries++;
             }
         } finally {
-            if (syncResult.madeSomeProgress())
+            if (syncResult.madeSomeProgress()) {
                 getContext().getContentResolver().notifyChange(CONTENT_URI, SYNC_OBSERVER);
+            }
             closeHelper(db);
+            syncResult.delayUntil = 60;
         }
         //If we reach this point there have been to many retries
         syncResult.tooManyRetries = true;
