@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -78,6 +79,9 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 		super.onViewCreated(view, savedInstanceState);
 		if(mUseLongClick)
 			getListView().setOnItemLongClickListener(this);
+        int[] colors = {0, 0, 0}; // red for the example
+        getListView().setDivider(new GradientDrawable(GradientDrawable.Orientation.RIGHT_LEFT, colors));
+        getListView().setDividerHeight(1);
 	}
 	
 	//==============================================================================================
@@ -85,6 +89,8 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 
 	@Override
 	public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+        int distance = getActivity().getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+		view.setPadding(distance,0,0,0);
 		switch (columnIndex) {
 			case 1://name column
 				((TextView) view).setText(cursor.getString(columnIndex));

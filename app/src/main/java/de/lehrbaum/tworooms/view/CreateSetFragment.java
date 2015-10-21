@@ -31,7 +31,6 @@ import android.content.*;
 public  final class CreateSetFragment extends ListFragment {
     private static final String TAG = CreateSetFragment.class.getSimpleName();
 	private static final int REQUEST_SET = Integer.MAX_VALUE - 1;
-	private static final int REQUEST_NEW_VARIATION = Integer.MAX_VALUE - 2;
 
     public static final String VARIATIONS_COUNT = "var_count";
 
@@ -233,18 +232,15 @@ public  final class CreateSetFragment extends ListFragment {
      *                   the user did not deselect.
      * @return If <CODE>true</CODE> is returned the
      */
-    public boolean setRoles(int id, long [] selections) {
+    public void setRoles(int id, long [] selections) {
         switch (id) {
             case REQUEST_SET:
                 mSetRoles = selections;
                 break;
-            case REQUEST_NEW_VARIATION:
-                addVariation(selections);
-                return true;
             default:
                 mVariations.set(id, selections);
+                mAdapter.getItem(id).count = selections.length;
         }
-        return false;
     }
 
     /**
@@ -293,7 +289,7 @@ public  final class CreateSetFragment extends ListFragment {
 		int count;
 	}
 
-	class VariationsAdapter extends ArrayAdapter<VariationsEntry> {
+	private class VariationsAdapter extends ArrayAdapter<VariationsEntry> {
 		LayoutInflater mInflater;
 		VariationsAdapter() {
 			super(getActivity(), R.layout.list_item_set,

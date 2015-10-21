@@ -46,6 +46,9 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
 		setUseLongClick(true);
 		long [] startSelections;
         if (getArguments() != null) {
@@ -64,6 +67,11 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
 		getLoaderManager().initLoader(ROLES_LOADER, null, this);
 
     }
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		return inflater.inflate(R.layout.fragment_choose_roles, container, false);
+	}
 
 	@Override
 	protected void setBackground(View v, int team) {

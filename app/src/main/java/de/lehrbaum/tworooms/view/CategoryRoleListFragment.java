@@ -1,6 +1,5 @@
 package de.lehrbaum.tworooms.view;
 
-import android.app.Fragment;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -11,13 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
-import android.widget.ListView;
 import android.widget.Spinner;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.view.util.NoneCursorAdapter;
 import de.lehrbaum.tworooms.view.util.RolesListFragment;
-import de.lehrbaum.tworooms.view.util.SortedCursor;
 
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.GROUP_COLUMN;
@@ -47,7 +44,7 @@ public class CategoryRoleListFragment extends RolesListFragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_choose_roles, container, false);
+		return inflater.inflate(R.layout.fragment_categories_list, container, false);
 	}
 
 	@Override

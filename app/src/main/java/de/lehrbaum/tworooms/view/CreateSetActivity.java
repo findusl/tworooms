@@ -62,10 +62,7 @@ public final class CreateSetActivity extends BaseActivity implements CreateSetFr
                     return;//no change
                 Bundle arguments = open.getArguments();
                 int selId = arguments.getInt(SELECTION_ID);
-				boolean remove = mFragment.setRoles(selId, selection);
-                if(remove) {
-                    getFragmentManager().beginTransaction().remove(open).commit();
-                }
+				mFragment.setRoles(selId, selection);
             }
 		}
 	}

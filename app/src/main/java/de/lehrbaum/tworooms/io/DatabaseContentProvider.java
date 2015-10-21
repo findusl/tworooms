@@ -20,7 +20,6 @@ public final class DatabaseContentProvider extends ContentProvider
     protected LocalDatabaseConnection mDbConnection;
 
     public static final class Constants {
-
         public static final Uri CONTENT_URI = Uri.parse("content://de.lehrbaum.tworooms.database");
         public static final String SET_ROLE_SELECTION = "set = ?";
         public static final String SETS_TABLE = "sets";

@@ -16,7 +16,6 @@
     <string name="menu_sort_Alphabet">Nach Namen sortieren</string>
     <string name="menu_sort_group">Nach Gruppen sortieren</string>
     <string name="no_filter">Kein Filter</string>
-    <string name="option_create_new_variation"> </string>
     <string name="title_activity_choose_role">Rollen auswählen</string>
     <string name="title_activity_create_set">Neues Set erstellen</string>
     <string name="title_activity_role_list">Liste der Rollen</string>
