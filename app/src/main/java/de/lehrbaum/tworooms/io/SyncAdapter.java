@@ -12,6 +12,8 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;

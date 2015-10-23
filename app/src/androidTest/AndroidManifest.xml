@@ -1,3 +1,6 @@
-<manifest>
-    <uses-sdk android:minSdkVersion="18" />
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:tools="http://schemas.android.com/tools"
+    package="de.lehrbaum.tworooms">
+    <uses-sdk tools:overrideLibrary="android.support.test.uiautomator.v18"/>
 </manifest>
