@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 
 import android.content.*;
@@ -40,13 +41,19 @@ public final class DatabaseContentProvider extends ContentProvider
         public static final String ID_SET_COLUMN = "id_set";
         public static final String ID_ROLE_COLUMN = "id_role";
         public static final String FROM_SERVER_COLUMN = "from_server";
+        public static final String OWNER_COLUMN = "owner";
+        public static final int TEAM_BLUE = 1;
 		public static final int TEAM_RED = 2;
-		public static final int TEAM_BLUE = 1;
 		public static final int TEAM_GRAY = 3;
 		public static final int TEAM_GREEN = 4;
         public static final int TEAM_YELLOW = 5;
         public static final int TEAM_VIOLETT = 6;
         public static final int TEAM_BLACK = 7;
+    }
+
+    public static String getDeviceID() {
+        //i hope the id is by default non empty. But a hexadecimal string should be non empty.
+        return Settings.Secure.ANDROID_ID;
     }
 
     @Override

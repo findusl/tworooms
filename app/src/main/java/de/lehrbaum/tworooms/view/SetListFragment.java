@@ -3,6 +3,7 @@ package de.lehrbaum.tworooms.view;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.content.ContentProvider;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -124,9 +125,17 @@ public final class SetListFragment extends ListFragment
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
 	{
-		if(v.getId() == android.R.id.list) {
-			MenuInflater inflater = getActivity().getMenuInflater();
-		}
+        Object item = mAdapter.getItem(((AdapterContextMenuInfo) menuInfo).position);
+        if(item instanceof Cursor) {
+            //check if user is allowed to delete
+            Cursor c = (Cursor) item;
+            String owner = c.getString(3);
+            //is this secure enough?
+            if(owner.contentEquals(DatabaseContentProvider.getDeviceID())) {
+                MenuInflater inflater = getActivity().getMenuInflater();
+                inflater.inflate(R.menu.context_menu_set, menu);
+            }
+        }
 		super.onCreateContextMenu(menu, v, menuInfo);
 	}
 	
@@ -134,7 +143,12 @@ public final class SetListFragment extends ListFragment
 	public boolean onContextItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 			case R.id.action_delete:
+			    //because final fragment this id is unique and it user is for sure allowed to delete
 				AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+                long id = mAdapter.getItemId(menuInfo.position);
+                //TODO: go to background
+                Uri uri = Uri.withAppendedPath(CONTENT_URI, "sets");
+                getActivity().getContentResolver().delete(uri, ID_COLUMN + "=" + id, null);
 				return true;
 		}
 		return super.onContextItemSelected(item);
@@ -187,8 +201,8 @@ public final class SetListFragment extends ListFragment
 			}
 		}
 		String selectionString = selection.length() > 0 ? selection.toString() : null;
-        return new CursorLoader(getActivity(), uri, new String[]{ID_COLUMN, NAME_COLUMN, COUNT_COLUMN},
-				selectionString, null, null);
+        String [] columns = new String[]{ID_COLUMN, NAME_COLUMN, COUNT_COLUMN, OWNER_COLUMN};
+        return new CursorLoader(getActivity(), uri, columns, selectionString, null, null);
     }
 
     @Override

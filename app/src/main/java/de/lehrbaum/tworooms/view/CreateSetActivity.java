@@ -8,6 +8,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
@@ -110,36 +111,19 @@ public final class CreateSetActivity extends BaseActivity implements CreateSetFr
         }
         Log.v(TAG, "Finish Set clicked. roles: " + Arrays.toString(setRoles) + " names: " +
                 Arrays.toString(variationNames) + " variations: " + Arrays.toString(variations));
+
+        //insert parent set
         Uri uri = Uri.withAppendedPath(CONTENT_URI, SETS_TABLE);
         ArrayList<ContentValues> roleInserts = new ArrayList<>((setRoles.length)*(variations.length + 1));
-        ContentValues values = new ContentValues(3);
-        values.put(NAME_COLUMN, name);
-        values.put(DESCRIPTION_COLUMN, description);
-        values.put(COUNT_COLUMN, setRoles.length);
-        Uri parentUri = getContentResolver().insert(uri, values);
-        long parent = Long.parseLong(parentUri.getLastPathSegment());
-        for(long l : setRoles) {
-            values = new ContentValues(2);
-            values.put(ID_SET_COLUMN, parent);
-            values.put(ID_ROLE_COLUMN, l);
-            roleInserts.add(values);
+        long parent = insertSet(uri, name, description, setRoles, -1, roleInserts);
+
+        //insert variations:
+        for(int i = 0; i < variations.length; i++) {
+            long [] variation = variations[i];
+            insertSet(uri, variationNames[i], description, variation, parent, roleInserts);
         }
-	   for(int i = 0; i < variations.length; i++) {
-		   long [] variation = variations[i];
-            values = new ContentValues(4);
-            values.put(NAME_COLUMN, variationNames[i]);
-            values.put(DESCRIPTION_COLUMN, description);
-            values.put(COUNT_COLUMN, variation.length);
-            values.put(PARENT_COLUMN, parent);
-            Uri currentUri = getContentResolver().insert(uri, values);
-		    long current = Long.parseLong(currentUri.getLastPathSegment());
-            for(long l : variation) {
-                values = new ContentValues(2);
-                values.put(ID_SET_COLUMN, current);
-                values.put(ID_ROLE_COLUMN, l);
-                roleInserts.add(values);
-            }
-        }
+
+        //do bulk role insert:
         uri = Uri.withAppendedPath(CONTENT_URI, SET_ROLES_TABLE);
         ContentValues [] roleInsertsArray = roleInserts.toArray(new ContentValues[roleInserts.size()]);
         getContentResolver().bulkInsert(uri, roleInsertsArray);
@@ -147,5 +131,25 @@ public final class CreateSetActivity extends BaseActivity implements CreateSetFr
         result.putExtra(RESULT_SET_ID, parent);
         setResult(RESULT_OK, result);
         finish();
+    }
+
+    private long insertSet(Uri target, String name, String description, long[] roles,
+                           long parent, List<ContentValues> roleInserts) {
+        ContentValues values = new ContentValues(5);
+        values.put(NAME_COLUMN, name);
+        values.put(DESCRIPTION_COLUMN, description);
+        values.put(COUNT_COLUMN, roles.length);
+        if(parent != -1)
+            values.put(PARENT_COLUMN, parent);
+        values.put(OWNER_COLUMN, DatabaseContentProvider.getDeviceID());
+        Uri parentUri = getContentResolver().insert(target, values);
+        long current = Long.parseLong(parentUri.getLastPathSegment());
+        for(long l : roles) {
+            values = new ContentValues(2);
+            values.put(ID_SET_COLUMN, current);
+            values.put(ID_ROLE_COLUMN, l);
+            roleInserts.add(values);
+        }
+        return current;
     }
 }

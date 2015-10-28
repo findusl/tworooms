@@ -101,6 +101,9 @@ public final class SyncAdapter extends AbstractThreadedSyncAdapter {
         syncResult.tooManyRetries = true;
     }
 
+    //==============================================================================================
+    //uploading=====================================================================================
+
     private void uploadChanges(SyncResult syncResult, SQLiteDatabase db) throws IOException {
         InputStream is = null;
         URL target;
