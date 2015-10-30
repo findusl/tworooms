@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.ContentProvider;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -22,6 +25,8 @@ import android.widget.*;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import de.lehrbaum.tworooms.io.LocalDatabaseConnection;
+
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 
 import android.view.*;
@@ -141,18 +146,47 @@ public final class SetListFragment extends ListFragment
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
-			case R.id.action_delete:
-			    //because final fragment this id is unique and it user is for sure allowed to delete
-				AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
-                long id = mAdapter.getItemId(menuInfo.position);
-                //TODO: go to background
-                Uri uri = Uri.withAppendedPath(CONTENT_URI, "sets");
-                getActivity().getContentResolver().delete(uri, ID_COLUMN + "=" + id, null);
-				return true;
-		}
-		return super.onContextItemSelected(item);
-	}
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                //because final fragment this id is unique and it user is for sure allowed to delete
+                AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+                final long id = mAdapter.getItemId(menuInfo.position);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        SQLiteDatabase db = new LocalDatabaseConnection(getActivity()).getWritableDatabase();
+                        db.beginTransaction();
+                        try {
+                            ContentValues values = new ContentValues(1);
+                            values.put(FROM_SERVER_COLUMN, 2);
+                            db.update(SETS_TABLE, null, ID_COLUMN + "=" + id, null);
+                            //TODO: parents/variations
+
+                            Uri uri = Uri.withAppendedPath(CONTENT_URI, SETS_TABLE);
+                            getActivity().getContentResolver().notifyChange(uri, null);
+                            db.setTransactionSuccessful();
+                            showToast(0);//TODO: show success
+                        } catch (Exception e) {
+                            showToast(1);//TODO: show error
+                        } finally {
+                            db.endTransaction();
+                        }
+                    }
+                }).start();
+                return true;
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    private void showToast(final int msg) {
+        new Handler(getActivity().getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                // Make and show the toast in the posted runnable
+                Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 	//==============================================================================================
 	//List callbacks================================================================================
@@ -192,7 +226,7 @@ public final class SetListFragment extends ListFragment
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = Uri.withAppendedPath(DatabaseContentProvider.Constants.CONTENT_URI, SETS_TABLE);
-		StringBuilder selection = new StringBuilder();
+		StringBuilder selection = new StringBuilder(10);
 		if(args != null && args.size() > 0) {
 			if(args.containsKey(SEL_COUNT)) {
 				selection.append(COUNT_COLUMN);
@@ -200,9 +234,11 @@ public final class SetListFragment extends ListFragment
 				selection.append(args.get(SEL_COUNT));
 			}
 		}
-		String selectionString = selection.length() > 0 ? selection.toString() : null;
+        if(selection.length() > 0) selection.append("||");
+        selection.append(FROM_SERVER_COLUMN);
+        selection.append("!=2");
         String [] columns = new String[]{ID_COLUMN, NAME_COLUMN, COUNT_COLUMN, OWNER_COLUMN};
-        return new CursorLoader(getActivity(), uri, columns, selectionString, null, null);
+        return new CursorLoader(getActivity(), uri, columns, selection.toString(), null, null);
     }
 
     @Override
