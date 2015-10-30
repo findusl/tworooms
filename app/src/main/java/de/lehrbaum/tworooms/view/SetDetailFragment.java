@@ -90,8 +90,6 @@ public final class SetDetailFragment extends RolesListFragment {
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         switch(loader.getId()) {
             case INFORMATION_LOADER:
-                if(!isVisible())
-                    return;
                 data.moveToFirst();
 
                 String name = data.getString(0);

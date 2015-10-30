@@ -38,17 +38,18 @@ public final class FloatingInfoView extends View {
         mPaddingTop = arr.getDimensionPixelOffset(1, 5);
         mPaddingBottom = arr.getDimensionPixelOffset(2, 5);
         mPaddingRight = arr.getDimensionPixelOffset(3, 5);
+        mText = "";
     }
 
     private void setupPaint() {
         mPaintShape = new Paint();
         mPaintShape.setStyle(Paint.Style.FILL);
         mPaintShape.setColor(Color.RED);
-        mPaintShape.setTextSize(30);
-        mPaintShape.setStyle(Paint.Style.FILL);
 
         mPaintText = new Paint();
         mPaintText.setColor(Color.BLACK);
+        mPaintText.setTextSize(30);
+        mPaintText.setStyle(Paint.Style.FILL);
     }
 
     public void setText(String s) {
@@ -68,6 +69,8 @@ public final class FloatingInfoView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if(mText.isEmpty())
+            return;
         canvas.drawText(mText, 0, 0, mPaintText);
         canvas.drawOval(new RectF(0, 0, getWidth(), getHeight()), mPaintShape);
     }

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.lehrbaum.tworooms.R;
+import de.lehrbaum.tworooms.view.util.FloatingInfoView;
 import de.lehrbaum.tworooms.view.util.NoneCursorAdapter;
 import de.lehrbaum.tworooms.view.util.RolesListFragment;
 import de.lehrbaum.tworooms.view.util.SortedCursor;
@@ -42,6 +43,7 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
 	private boolean mChanged;
 	private int mSelectionCount;
 	private Map<Integer, SparseIntArray> mRoleCombinations;
+	private FloatingInfoView mInfoView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,12 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_choose_roles, container, false);
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+        mInfoView = (FloatingInfoView) view.findViewById(R.id.floating_count_view);
 	}
 
 	@Override
@@ -140,6 +148,7 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
 				lv.setItemChecked(i, true);
 			}
 			initRoleComps(sc);
+            mInfoView.setText(Integer.toString(selected));
 		} else  {
 			super.onLoadFinished(loader, data);
 		}

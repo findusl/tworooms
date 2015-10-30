@@ -24,6 +24,7 @@
     </LinearLayout>
 
     <de.lehrbaum.tworooms.view.util.FloatingInfoView
+        android:id="@+id/floating_count_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/floating_action_button"

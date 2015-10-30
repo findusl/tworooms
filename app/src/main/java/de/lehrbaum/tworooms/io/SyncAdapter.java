@@ -108,30 +108,23 @@ public final class SyncAdapter extends AbstractThreadedSyncAdapter {
         InputStream is = null;
         URL target;
         try {
-            String jsonString = getChangeData(db);
-            if(jsonString != null) {
-                target = new URL("http", "lehrbaum.de", "twoRoomsWriteSQL.php");
-                String setsHtmlString = Html.escapeHtml(jsonString);
-                Log.d(TAG, "Sending jsonData: " + setsHtmlString);
-                //still have to encode for the url:
-                String setsURLString = URLEncoder.encode(setsHtmlString, "utf-8");
-                is = sendPostRequest(target, setsURLString);
-                copy(is, System.out);
-                System.out.println();
-                //after successful sending, delete the entries from the database
-                db.delete(SETS_TABLE, FROM_SERVER_COLUMN + "=0", null);
-                syncResult.stats.numInserts++;
-            }
+            String addJsonString = getChangeData(db, 0);
+            String delJsonString = getChangeData(db, 2);
+            target = new URL("http", "lehrbaum.de", "twoRoomsWriteSQL.php");
+            is = sendPostRequest(target, addJsonString, delJsonString);
+            //after successful sending, delete the entries from the database
+            db.delete(SETS_TABLE, FROM_SERVER_COLUMN + "=0||" + FROM_SERVER_COLUMN + "=2", null);
         } finally {
             closeHelper(is);
         }
     }
 
-    private String getChangeData(SQLiteDatabase db) throws MalformedURLException {
+    private String getChangeData(SQLiteDatabase db, int fromServer) throws MalformedURLException {
         Cursor c = null;
         Cursor roleC = null;
         try {
-            c = db.query(SETS_TABLE, null, FROM_SERVER_COLUMN + " = 0", null, null, null, PARENT_COLUMN + " ASC");
+            //TODO: for fromServer = 2 do not get name/description/count
+            c = db.query(SETS_TABLE, null, FROM_SERVER_COLUMN + " = " + fromServer, null, null, null, PARENT_COLUMN + " ASC");
             if(c.getCount() > 0) {//Only do work if sets have changed
                 JSONArray sets = new JSONArray();
                 for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
@@ -165,19 +158,17 @@ public final class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private void copy(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[128];
-        int len;
-        while ((len = in.read(buffer)) != -1) {
-            out.write(buffer, 0, len);
-        }
-    }
+    private InputStream sendPostRequest(URL target, String addjsonData, String deljsonData) throws IOException {
+        //still have to encode for the url:
+        String addJsonURLData = URLEncoder.encode(Html.escapeHtml(addjsonData), "utf-8");
+        String delJsonURLData = URLEncoder.encode(Html.escapeHtml(deljsonData), "utf-8");
 
-    private InputStream sendPostRequest(URL target, String jsonData) throws IOException {
         OutputStreamWriter osw = null;
         StringBuilder data = new StringBuilder();
-        data.append("sets=");
-        data.append(jsonData);
+        data.append("add=");
+        data.append(addJsonURLData);
+        data.append("&del=");
+        data.append(delJsonURLData);
         data.append("&version=");
         data.append(LocalDatabaseConnection.DATABASE_VERSION);
         data.append("&userId=");
