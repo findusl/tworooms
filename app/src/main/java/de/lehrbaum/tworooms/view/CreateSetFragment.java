@@ -1,31 +1,21 @@
 package de.lehrbaum.tworooms.view;
 
-import android.animation.StateListAnimator;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListFragment;
-import android.os.Build;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.text.InputType;
+import android.view.*;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import de.lehrbaum.tworooms.R;
-
-import android.view.*;
-import android.widget.AdapterView.*;
-import android.app.*;
-import android.widget.*;
-import android.text.*;
-import android.content.*;
+import de.lehrbaum.tworooms.io.Set;
 
 
 public  final class CreateSetFragment extends ListFragment {
@@ -39,13 +29,10 @@ public  final class CreateSetFragment extends ListFragment {
 	private TextView mNameView;
     private Button mChangeSetButton;
     private boolean mActivateOnItemClick = false;
+    private int mAutoIncrementVariation = 0;
 
-    private List<long []> mVariations;
-	/** Need extra counter in case of deleting variations. */
-	private int mAutoIncrementVariation = 0;
-	private List<String> mVariationNames;
-
-    private long [] mSetRoles;
+    private Set mSet;
+    private List<Set> mVariations;
 
     private VariationsAdapter mAdapter;
 
@@ -53,9 +40,8 @@ public  final class CreateSetFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mSet = new Set();
         mVariations = new ArrayList<>();
-		mVariationNames = new ArrayList<>();
-        mSetRoles = new long [] {1, 2};
 
         mAdapter = new VariationsAdapter();
         setListAdapter(mAdapter);
@@ -65,8 +51,7 @@ public  final class CreateSetFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_create_set, container, false);
-        return view;
+        return inflater.inflate(R.layout.fragment_create_set, container, false);
     }
 
 	@Override
@@ -121,8 +106,7 @@ public  final class CreateSetFragment extends ListFragment {
 			switch(item.getItemId()) {
 			case R.id.action_delete:
 				mAdapter.remove(mAdapter.getItem(menuInfo.position));
-				mVariations.remove(menuInfo.position);
-				mVariationNames.remove(menuInfo.position);
+                mVariations.remove(menuInfo.position);
 				return true;
 			case R.id.action_rename:
 				changeName(menuInfo.position);
@@ -140,7 +124,8 @@ public  final class CreateSetFragment extends ListFragment {
 		final EditText input = new EditText(getActivity());
 		input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE |
                 InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
-		input.setText(mVariationNames.get(position));
+        final Set selected = mVariations.get(position);
+		input.setText(selected.getName());
 		builder.setView(input);
 
 		// Set up the buttons
@@ -150,11 +135,8 @@ public  final class CreateSetFragment extends ListFragment {
 				String name = input.getText().toString();
 				if(name.length() == 0)
 					return;
-				VariationsEntry entry = mAdapter.getItem(position);
-				mAdapter.remove(entry);
-				entry.name = name;
-				mAdapter.insert(entry, position);
-        		mVariationNames.set(position, name);
+                selected.setName(name);
+                mAdapter.notifyDataSetChanged();
     		}
 		});
 		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -174,7 +156,7 @@ public  final class CreateSetFragment extends ListFragment {
 		mListener.saveOpenVariation();
 		if(mVariations.size() != 0)
 			Toast.makeText(getActivity(), R.string.warning_change_set, Toast.LENGTH_SHORT).show();
-        mListener.onChangeRoles(REQUEST_SET, mSetRoles);
+        mListener.onChangeRoles(REQUEST_SET, mSet);
         getListView().setItemChecked(-1, true);
         new Handler(getActivity().getMainLooper()).post(new Runnable() {
             @Override
@@ -186,17 +168,34 @@ public  final class CreateSetFragment extends ListFragment {
     }
 
     protected void onAddVariationClicked() {
-        int pos = addVariation(mSetRoles);
+        Set newVariation = new Set();
+        newVariation.setSelection(mSet.getSelection());
+        String name = mNameView.getText().toString();
+        if(name.length() == 0)
+            name = getActivity().getString(R.string.default_new_variation);
+        //increment before because starting to count at 1 is more intuitive
+        name +=  " v" + (++mAutoIncrementVariation+1);
+        newVariation.setName(name);
+        mAdapter.add(newVariation);
+        mVariations.add(newVariation);
     }
 
     protected void onSaveSetClicked() {
 		mListener.saveOpenVariation();
         TextView desc = (TextView) getView().findViewById(R.id.desc_text);
-        mListener.onFinishSetClick(mNameView.getText().toString(),
-                desc.getText().toString(),
-                mSetRoles,
-                mVariationNames.toArray(new String[mVariationNames.size()]),
-                mVariations.toArray(new long[mVariations.size()][]));
+        String name = mNameView.getText().toString();
+        if(name == null || name.length() == 0) {
+            Toast.makeText(getActivity(), R.string.error_set_name, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(mSet.getCount() == 0) {
+            Toast.makeText(getActivity(), R.string.error_set_roles, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mSet.setName(name);
+        mSet.setDescription(desc.getText().toString());
+        mListener.onFinishSet(mSet,
+                mVariations.toArray(new Set[mVariations.size()]));
     }
 
     @Override
@@ -209,37 +208,20 @@ public  final class CreateSetFragment extends ListFragment {
     //==============================================================================================
     //Activity interaction==========================================================================
 
-    private int addVariation(long [] variation) {
-        mVariations.add(variation);
-        String name = mNameView.getText().toString();
-        if(name.length() == 0)
-            name = getActivity().getString(R.string.default_new_variation);
-        //increment before because starting to count at 1 is more intuitive
-        name +=  " v" + (++mAutoIncrementVariation+1);
-        mVariationNames.add(name);
-		VariationsEntry entry = new VariationsEntry();
-		entry.name = name;
-		entry.count = variation.length;
-        mAdapter.add(entry);
-        return mVariations.size()-1;
-    }
-
     /**
      * Sets the roles selected by the user.
      *
      * @param id The id of the changed role set.
-     * @param selections The roles selected by the user and (if existent) preselected roles that
+     * @param set The roles selected by the user and (if existent) preselected roles that
      *                   the user did not deselect.
-     * @return If <CODE>true</CODE> is returned the
      */
-    public void setRoles(int id, long [] selections) {
+    public void setRoles(int id, Set set) {
         switch (id) {
             case REQUEST_SET:
-                mSetRoles = selections;
+                mSet.copySelection(set);
                 break;
             default:
-                mVariations.set(id, selections);
-                mAdapter.getItem(id).count = selections.length;
+                mVariations.get(id).copySelection(set);
         }
     }
 
@@ -273,27 +255,21 @@ public  final class CreateSetFragment extends ListFragment {
     }
 
     public interface OnFragmentInteractionListener {
-        void onChangeRoles(int id, long [] selections);
-		
+        void onChangeRoles(int id, Set set);
+
 		/**
 		 * Removes any old pending choose role operations in two pane mode.
 		 */
 		void saveOpenVariation();
 
-        void onFinishSetClick(String name, String description, long [] setRoles,
-							String [] variationNames, long [][] variations);
+        void onFinishSet(Set set, Set[] variations);
     }
-	
-	class VariationsEntry {
-		String name;
-		int count;
-	}
 
-	private class VariationsAdapter extends ArrayAdapter<VariationsEntry> {
+	private class VariationsAdapter extends ArrayAdapter<Set> {
 		LayoutInflater mInflater;
 		VariationsAdapter() {
 			super(getActivity(), R.layout.list_item_set,
-				  new ArrayList<VariationsEntry>());
+				  new ArrayList<Set>());
 			mInflater = LayoutInflater.from(getActivity());
 		}
 
@@ -306,11 +282,11 @@ public  final class CreateSetFragment extends ListFragment {
 			} else {
 				v = convertView;
 			}
-			VariationsEntry entry = getItem(position);
+			Set set = getItem(position);
 			TextView mainText = (TextView) v.findViewById(android.R.id.text1);
 			TextView counterText = (TextView) v.findViewById(R.id.counterView);
-			mainText.setText(entry.name);
-			counterText.setText(Integer.toString(entry.count));
+			mainText.setText(set.getName());
+			counterText.setText(Integer.toString(set.getCount()));
 			return v;
 		}
 	}

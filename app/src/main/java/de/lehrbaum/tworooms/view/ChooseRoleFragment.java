@@ -1,11 +1,9 @@
 package de.lehrbaum.tworooms.view;
 
-import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -13,20 +11,19 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.Spinner;
+import android.widget.SeekBar;
+import android.widget.SimpleCursorAdapter;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import de.lehrbaum.tworooms.R;
+import de.lehrbaum.tworooms.io.Set;
+import de.lehrbaum.tworooms.view.util.ChooseRolesListAdapter;
 import de.lehrbaum.tworooms.view.util.FloatingInfoView;
-import de.lehrbaum.tworooms.view.util.NoneCursorAdapter;
-import de.lehrbaum.tworooms.view.util.RolesListFragment;
 import de.lehrbaum.tworooms.view.util.SortedCursor;
 
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
@@ -37,11 +34,10 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 public final class ChooseRoleFragment extends CategoryRoleListFragment {
     private static final String TAG = ChooseRoleFragment.class.getSimpleName();
 
-    public static final String SELECTION_INDEX = "sel_index";
 	
 	private SparseBooleanArray mSelections;
 	private boolean mChanged;
-	private int mSelectionCount;
+    private Set mSet;
 	private Map<Integer, SparseIntArray> mRoleCombinations;
 	private FloatingInfoView mInfoView;
 
@@ -49,13 +45,11 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
 		setUseLongClick(true);
 		long [] startSelections;
         if (getArguments() != null) {
-			startSelections = getArguments().getLongArray(SELECTION_INDEX);
-            Log.i(TAG, "Selection with indices: " + Arrays.toString(startSelections));
+            mSet = new Set(getArguments());
+            startSelections = mSet.getSelection();
         }
         else {
 			startSelections = new long[0];
@@ -64,11 +58,26 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
 		mSelections = new SparseBooleanArray();
 		for (long startSelection : startSelections)
 			mSelections.put((int) startSelection, true);
-		mSelectionCount = startSelections.length;
 
 		getLoaderManager().initLoader(ROLES_LOADER, null, this);
-
     }
+
+	@Override
+	public CursorAdapter onCreateListAdapter() {
+        SeekBar.OnSeekBarChangeListener blueRole = new SeekBarListenerAdapter() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mSet.setBlueRoleCount(progress);
+            }
+        };
+        SeekBar.OnSeekBarChangeListener redRole = new SeekBarListenerAdapter() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mSet.setRedRoleCount(progress);
+            }
+        };
+        return new ChooseRolesListAdapter(getActivity(), blueRole, redRole);
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -95,17 +104,17 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
 	//==============================================================================================
 	//List callbacks================================================================================
 
-	public long [] getSelection () {
+	public Set getSet () {
 		if(!mChanged)
 			return null;
-        long [] selections = new long[mSelectionCount];
+        long [] selections = new long[mSelections.size()];
 
 		for(int i = 0, j = 0; i < mSelections.size(); i++) {
 			if(mSelections.valueAt(i))
 				selections[j++] = mSelections.keyAt(i);
 		}
-
-		return selections;
+        mSet.setSelection(selections);
+		return mSet;
     }
 
 	@Override
@@ -128,10 +137,6 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
 		if(!mChanged)
 			mChanged = true;
 		mSelections.put((int) id, selected);
-		if(selected)
-			mSelectionCount++;
-		else
-			mSelectionCount--;
 	}
 
 	//==============================================================================================
@@ -174,4 +179,11 @@ public final class ChooseRoleFragment extends CategoryRoleListFragment {
 		}
 		mRoleCombinations.put(last_team, arr);
 	}
+
+    private abstract class SeekBarListenerAdapter implements SeekBar.OnSeekBarChangeListener {
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {}
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {}
+    }
 }

@@ -24,7 +24,7 @@ public final class ChooseRolesListAdapter extends SimpleCursorAdapter{
 
     private SeekBar.OnSeekBarChangeListener blueRole, redRole;
 
-    ChooseRolesListAdapter (Context context, SeekBar.OnSeekBarChangeListener blueRole, SeekBar.OnSeekBarChangeListener redBar) {
+    public ChooseRolesListAdapter (Context context, SeekBar.OnSeekBarChangeListener blueRole, SeekBar.OnSeekBarChangeListener redBar) {
         super(context,
                 android.R.layout.simple_list_item_1, null,
                 new String[]{NAME_COLUMN, TEAM_COLUMN},
@@ -48,6 +48,7 @@ public final class ChooseRolesListAdapter extends SimpleCursorAdapter{
                 sb.setOnSeekBarChangeListener(blueRole);
             else
                 sb.setOnSeekBarChangeListener(redRole);
+            v.setClickable(false);
             return v;
         }else {
             if(convertView != null && convertView instanceof LinearLayout)

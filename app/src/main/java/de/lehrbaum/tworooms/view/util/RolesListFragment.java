@@ -49,14 +49,14 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 				case ALPHABETICAL:
 					return GROUP;
 				case GROUP:
+                default:
 					return ALPHABETICAL;
 			}
-			return null;
 		}
 	}
 
 	private boolean mUseLongClick = false;
-	protected SimpleCursorAdapter mAdapter;
+	protected CursorAdapter mAdapter;
 	protected SORT_ORDER mSortOrder = SORT_ORDER.GROUP;
 
 	@Override
@@ -64,14 +64,18 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 		super.onCreate(savedInstanceState);
 
 		//TODO: Add item @id/android:empty to display while list is empty
-
-		mAdapter = new SimpleCursorAdapter(getActivity(),
-				android.R.layout.simple_list_item_activated_1, null,
-				new String[] {NAME_COLUMN, TEAM_COLUMN},
-				new int[]{android.R.id.text1, android.R.id.text1}, 0);
-		mAdapter.setViewBinder(this);
+        mAdapter = onCreateListAdapter();
 		setListAdapter(mAdapter);
 		setHasOptionsMenu(true);
+	}
+
+	public CursorAdapter onCreateListAdapter() {
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(),
+                        android.R.layout.simple_list_item_activated_1, null,
+                        new String[] {NAME_COLUMN, TEAM_COLUMN},
+                        new int[]{android.R.id.text1, android.R.id.text1}, 0);
+        adapter.setViewBinder(this);
+        return adapter;
 	}
 
 	@Override
@@ -130,8 +134,7 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
             case TEAM_BLACK:
                 return Color.BLACK;
         }
-		int color = getActivity().getResources().getColor(colorRes);
-		return color;
+		return getActivity().getResources().getColor(colorRes);
 	}
 
 	//==============================================================================================
@@ -180,7 +183,6 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		Uri uri;
-		String [] selArgs = null;
 		String selection = null;
 		String [] columns;
 		String sortOrder = null;
@@ -198,7 +200,7 @@ public class RolesListFragment extends ListFragment implements AdapterView.OnIte
 			default:
 				throw new IllegalArgumentException("Unsupported loader id: " + id);
 		}
-		return new CursorLoader(getActivity(), uri, columns, selection, selArgs, sortOrder);
+		return new CursorLoader(getActivity(), uri, columns, selection, null, sortOrder);
 	}
 	
 	@Override

@@ -32,11 +32,8 @@ public final class ChooseRoleActivity extends BaseActivity {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
-            Bundle arguments = new Bundle();
-			long [] selIndizes = getIntent().getLongArrayExtra(ChooseRoleFragment.SELECTION_INDEX);
-			arguments.putLongArray(ChooseRoleFragment.SELECTION_INDEX, selIndizes);
             mFragment = new ChooseRoleFragment();
-            mFragment.setArguments(arguments);
+            mFragment.setArguments(getIntent().getExtras());
             getFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, mFragment)
                     .commit();

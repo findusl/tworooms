@@ -8,3 +8,5 @@ INSERT INTO roles_en VALUES (101, "Red Role",
 INSERT INTO roles_de VALUES (101, "Rote Rolle",
     "Du bist eine einfache rote Rolle. Du möchtest das der Präsident stirbt.",2,100, 1);
 ALTER TABLE sets ADD COLUMN owner TEXT DEFAULT "";
+ALTER TABLE sets ADD COLUMN blue_roles INT DEFAULT 0;
+ALTER TABLE sets ADD COLUMN red_roles INT DEFAULT 0;

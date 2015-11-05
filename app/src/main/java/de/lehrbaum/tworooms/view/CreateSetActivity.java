@@ -12,6 +12,7 @@ import java.util.List;
 
 import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import de.lehrbaum.tworooms.io.Set;
 import de.lehrbaum.tworooms.view.util.BaseActivity;
 
 import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
@@ -58,23 +59,22 @@ public final class CreateSetActivity extends BaseActivity implements CreateSetFr
             Fragment open = getFragmentManager().findFragmentByTag(CHOOSE_ROLE_TAG);
             if(open != null && open instanceof ChooseRoleFragment) {
                 ChooseRoleFragment fragment = (ChooseRoleFragment) open;
-                long [] selection = fragment.getSelection();
-                if(selection == null)
+                Set set = fragment.getSet();
+                if(set == null)
                     return;//no change
                 Bundle arguments = open.getArguments();
                 int selId = arguments.getInt(SELECTION_ID);
-				mFragment.setRoles(selId, selection);
+				mFragment.setRoles(selId, set);
             }
 		}
 	}
 
     @Override
-    public void onChangeRoles(int id, long[] selections) {
+    public void onChangeRoles(int id, Set set) {
         if (mTwoPane) {
             //put new fragment
             Bundle arguments = new Bundle();
-            arguments.putLongArray(ChooseRoleFragment.SELECTION_INDEX, selections);
-            arguments.putInt(SELECTION_ID, id);
+            set.addToBundle(arguments, true);
             Fragment fragment = new ChooseRoleFragment();
             fragment.setArguments(arguments);
             getFragmentManager().beginTransaction()
@@ -85,7 +85,7 @@ public final class CreateSetActivity extends BaseActivity implements CreateSetFr
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, ChooseRoleActivity.class);
-            detailIntent.putExtra(ChooseRoleFragment.SELECTION_INDEX, selections);
+            set.addToIntent(detailIntent, true);
             startActivityForResult(detailIntent, id);
         }
     }
@@ -93,34 +93,24 @@ public final class CreateSetActivity extends BaseActivity implements CreateSetFr
     @Override
     protected final void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK) {
-            long [] selection = data.getLongArrayExtra(ChooseRoleFragment.SELECTION_INDEX);
-			mFragment.setRoles(requestCode, selection);
+            Set set = new Set(data.getExtras());
+			mFragment.setRoles(requestCode, set);
         }
     }
 
     @Override
-    public void onFinishSetClick(String name, String description, long[] setRoles, 
-								String [] variationNames, long[][] variations) {
-		if(name == null || name.length() == 0) {
-			Toast.makeText(this, R.string.error_set_name, Toast.LENGTH_SHORT).show();
-			return;
-		}
-        if(setRoles == null || setRoles.length == 0) {
-            Toast.makeText(this, R.string.error_set_roles, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        Log.v(TAG, "Finish Set clicked. roles: " + Arrays.toString(setRoles) + " names: " +
-                Arrays.toString(variationNames) + " variations: " + Arrays.toString(variations));
+    public void onFinishSet(Set set, Set[] variations) {
+        Log.v(TAG, "Finish Set clicked. roles");
 
         //insert parent set
         Uri uri = Uri.withAppendedPath(CONTENT_URI, SETS_TABLE);
-        ArrayList<ContentValues> roleInserts = new ArrayList<>((setRoles.length)*(variations.length + 1));
-        long parent = insertSet(uri, name, description, setRoles, -1, roleInserts);
+        ArrayList<ContentValues> roleInserts =
+                new ArrayList<>((set.getCount())*(variations.length + 1));
+        long parent = set.writeToDatabase(this, -1, roleInserts);
 
         //insert variations:
-        for(int i = 0; i < variations.length; i++) {
-            long [] variation = variations[i];
-            insertSet(uri, variationNames[i], description, variation, parent, roleInserts);
+        for(Set variation : variations) {
+            variation.writeToDatabase(this, parent, roleInserts);
         }
 
         //do bulk role insert:
@@ -131,25 +121,5 @@ public final class CreateSetActivity extends BaseActivity implements CreateSetFr
         result.putExtra(RESULT_SET_ID, parent);
         setResult(RESULT_OK, result);
         finish();
-    }
-
-    private long insertSet(Uri target, String name, String description, long[] roles,
-                           long parent, List<ContentValues> roleInserts) {
-        ContentValues values = new ContentValues(5);
-        values.put(NAME_COLUMN, name);
-        values.put(DESCRIPTION_COLUMN, description);
-        values.put(COUNT_COLUMN, roles.length);
-        if(parent != -1)
-            values.put(PARENT_COLUMN, parent);
-        values.put(OWNER_COLUMN, DatabaseContentProvider.getDeviceID());
-        Uri parentUri = getContentResolver().insert(target, values);
-        long current = Long.parseLong(parentUri.getLastPathSegment());
-        for(long l : roles) {
-            values = new ContentValues(2);
-            values.put(ID_SET_COLUMN, current);
-            values.put(ID_ROLE_COLUMN, l);
-            roleInserts.add(values);
-        }
-        return current;
     }
 }

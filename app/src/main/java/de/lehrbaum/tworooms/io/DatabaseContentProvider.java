@@ -42,6 +42,8 @@ public final class DatabaseContentProvider extends ContentProvider
         public static final String ID_ROLE_COLUMN = "id_role";
         public static final String FROM_SERVER_COLUMN = "from_server";
         public static final String OWNER_COLUMN = "owner";
+        public static final String RED_ROLES_COLUMN = "red_roles";
+        public static final String BLUE_ROLES_COLUMN = "blue_roles";
         public static final int TEAM_BLUE = 1;
 		public static final int TEAM_RED = 2;
 		public static final int TEAM_GRAY = 3;
