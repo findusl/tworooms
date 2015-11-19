@@ -1,4 +1,4 @@
-package de.lehrbaum.tworooms.io;
+package de.lehrbaum.tworooms.database;
 
 import android.accounts.Account;
 import android.content.*;
@@ -6,14 +6,11 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,11 +21,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.*;
 
 /**
  * Handle the transfer of data between a server and an

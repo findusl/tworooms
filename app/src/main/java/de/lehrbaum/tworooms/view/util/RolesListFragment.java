@@ -16,9 +16,9 @@ import android.view.View;
 import android.widget.*;
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import de.lehrbaum.tworooms.database.DatabaseContentProvider;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.*;
 import android.view.*;
 
 /**

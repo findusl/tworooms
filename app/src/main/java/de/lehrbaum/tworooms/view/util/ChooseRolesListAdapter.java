@@ -11,8 +11,8 @@ import android.widget.SimpleCursorAdapter;
 
 import de.lehrbaum.tworooms.R;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.NAME_COLUMN;
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.TEAM_COLUMN;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.NAME_COLUMN;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.TEAM_COLUMN;
 
 /**
  * Created by findu on 21.10.2015.

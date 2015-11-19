@@ -1,11 +1,10 @@
-package de.lehrbaum.tworooms.view;
+package de.lehrbaum.tworooms.view.createSet;
 
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -14,19 +13,16 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.SimpleCursorAdapter;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.Set;
+import de.lehrbaum.tworooms.database.Set;
+import de.lehrbaum.tworooms.view.CategoryRoleListFragment;
 import de.lehrbaum.tworooms.view.util.ChooseRolesListAdapter;
 import de.lehrbaum.tworooms.view.util.FloatingInfoView;
 import de.lehrbaum.tworooms.view.util.SortedCursor;
-
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
 
 /**
  * A placeholder fragment containing a simple view.

@@ -2,7 +2,6 @@ package de.lehrbaum.tworooms.view;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -13,11 +12,10 @@ import android.os.Handler;
 import android.util.Log;
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.DatabaseContentProvider;
-import de.lehrbaum.tworooms.io.SyncAdapter;
+import de.lehrbaum.tworooms.database.SyncAdapter;
 import de.lehrbaum.tworooms.view.util.BaseActivity;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.*;
 
 
 /**

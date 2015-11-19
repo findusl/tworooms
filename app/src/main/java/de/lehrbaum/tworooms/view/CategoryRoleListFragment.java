@@ -16,10 +16,10 @@ import de.lehrbaum.tworooms.R;
 import de.lehrbaum.tworooms.view.util.NoneCursorAdapter;
 import de.lehrbaum.tworooms.view.util.RolesListFragment;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.GROUP_COLUMN;
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.ID_COLUMN;
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.TEAM_COLUMN;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.*;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.GROUP_COLUMN;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.ID_COLUMN;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.TEAM_COLUMN;
 
 
 public class CategoryRoleListFragment extends RolesListFragment

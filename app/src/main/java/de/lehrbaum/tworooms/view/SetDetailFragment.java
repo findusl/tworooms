@@ -5,20 +5,17 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.DatabaseContentProvider;
+import de.lehrbaum.tworooms.database.DatabaseContentProvider;
 import de.lehrbaum.tworooms.view.util.RolesListFragment;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.*;
 
 /**
  * A fragment representing a single set detail screen.

@@ -1,4 +1,4 @@
-package de.lehrbaum.tworooms.io;
+package de.lehrbaum.tworooms.database;
 
 import android.app.Service;
 import android.content.Intent;

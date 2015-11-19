@@ -2,7 +2,7 @@
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:tools="http://schemas.android.com/tools"
 android:id="@+id/create_set_fragment"
-android:name="de.lehrbaum.tworooms.view.CreateSetFragment"
+android:name="de.lehrbaum.tworooms.view.createSet.CreateSetFragment"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context=".createSetActivity"

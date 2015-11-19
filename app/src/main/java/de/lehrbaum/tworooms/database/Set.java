@@ -1,15 +1,14 @@
-package de.lehrbaum.tworooms.io;
+package de.lehrbaum.tworooms.database;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 
 import java.util.List;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.*;
 
 /**
  * This class represents a single set and is used when manipulating a set.
@@ -18,7 +17,8 @@ import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
  */
 public class Set {
     private static final Uri URI_TARGET = Uri.withAppendedPath(CONTENT_URI, SET_ROLES_TABLE);
-    private static final String SEL_INDIZES = "SET_sI", BR_COUNT = "SET_br", RR_COUNT = "SET_rr";
+    private static final String SEL_INDIZES = "SET_sI", BR_COUNT = "SET_br", RR_COUNT = "SET_rr",
+            SET_NAME = "SET_n", SET_DESC = "SET_d";
 
     /**
      * These variables may be null
@@ -41,11 +41,16 @@ public class Set {
         this.mSelection = selection;
         this.mBlueRoleCount = blueRoleCount;
         this.mRedRoleCount = redRoleCount;
+        if(mSelection == null)
+            mSelection = new long [0];
         setCount(mSelection.length + mBlueRoleCount + mRedRoleCount);
     }
 
     public Set(Bundle bundle) {
-        //TODO
+        this(bundle.getLongArray(SEL_INDIZES), bundle.getInt(BR_COUNT, 0),
+                bundle.getInt(RR_COUNT, 0));
+        mName = bundle.getString(SET_NAME);
+        mDescription = bundle.getString(SET_DESC);
     }
 
     public String getName() {
@@ -104,11 +109,23 @@ public class Set {
     }
 
     public void addToIntent(Intent intent, boolean selectionOnly) {
-
+        if(!selectionOnly) {
+            intent.putExtra(SET_NAME, mName);
+            intent.putExtra(SET_DESC, mDescription);
+        }
+        intent.putExtra(SEL_INDIZES, mSelection);
+        intent.putExtra(BR_COUNT, mBlueRoleCount);
+        intent.putExtra(RR_COUNT, mRedRoleCount);
     }
 
     public void addToBundle(Bundle bundle, boolean selectionOnly) {
-
+        if(!selectionOnly) {
+            bundle.putString(SET_NAME, mName);
+            bundle.putString(SET_DESC, mDescription);
+        }
+        bundle.putInt(BR_COUNT, mBlueRoleCount);
+        bundle.putInt(RR_COUNT, mRedRoleCount);
+        bundle.putLongArray(SEL_INDIZES, mSelection);
     }
 
     public long writeToDatabase(Context c, long parent,List<ContentValues> roleInserts) {

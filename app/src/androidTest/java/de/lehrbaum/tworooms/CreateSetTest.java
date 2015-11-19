@@ -9,8 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import de.lehrbaum.tworooms.view.ChooseRoleActivity;
-import de.lehrbaum.tworooms.view.CreateSetActivity;
+import de.lehrbaum.tworooms.view.createSet.CreateSetActivity;
 
 import static android.support.test.espresso.Espresso.*;
 import static android.support.test.espresso.action.ViewActions.*;

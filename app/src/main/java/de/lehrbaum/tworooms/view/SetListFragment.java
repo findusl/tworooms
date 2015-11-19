@@ -3,7 +3,6 @@ package de.lehrbaum.tworooms.view;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
-import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -24,10 +23,11 @@ import android.view.ViewGroup;
 import android.widget.*;
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.DatabaseContentProvider;
-import de.lehrbaum.tworooms.io.LocalDatabaseConnection;
+import de.lehrbaum.tworooms.database.DatabaseContentProvider;
+import de.lehrbaum.tworooms.database.LocalDatabaseConnection;
+import de.lehrbaum.tworooms.view.createSet.CreateSetActivity;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.*;
 
 import android.view.*;
 import android.widget.AdapterView.*;

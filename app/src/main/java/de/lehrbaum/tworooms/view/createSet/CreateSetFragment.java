@@ -1,4 +1,4 @@
-package de.lehrbaum.tworooms.view;
+package de.lehrbaum.tworooms.view.createSet;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.Set;
+import de.lehrbaum.tworooms.database.Set;
 
 
 public  final class CreateSetFragment extends ListFragment {

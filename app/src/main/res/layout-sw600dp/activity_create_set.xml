@@ -16,7 +16,7 @@
 
     -->
 
-    <fragment android:id="@+id/create_set_fragment" android:name="de.lehrbaum.tworooms.view.CreateSetFragment"
+    <fragment android:id="@+id/create_set_fragment" android:name="de.lehrbaum.tworooms.view.createSet.CreateSetFragment"
         android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
         tools:layout="@layout/fragment_create_set" />
 

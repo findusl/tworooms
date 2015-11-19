@@ -29,15 +29,15 @@
             android:parentActivityName=".view.SetListActivity" >
         </activity>
         <activity
-            android:name=".view.CreateSetActivity"
+            android:name=".view.createSet.CreateSetActivity"
             android:label="@string/title_activity_create_set"
             android:parentActivityName=".view.SetListActivity" >
         </activity>
 
         <activity
-            android:name=".view.ChooseRoleActivity"
+            android:name=".view.createSet.ChooseRoleActivity"
             android:label="@string/title_activity_choose_role"
-            android:parentActivityName=".view.ChooseRoleActivity" >
+            android:parentActivityName=".view.createSet.ChooseRoleActivity" >
         </activity>
 
         <activity
@@ -46,14 +46,14 @@
         </activity>
 
         <provider
-            android:name=".io.DatabaseContentProvider"
+            android:name=".database.DatabaseContentProvider"
             android:authorities="@string/account_authority"
             android:enabled="true"
             android:exported="false"
             android:syncable="true" >
         </provider>
 
-        <service android:name=".io.AuthenticatorService" >
+        <service android:name=".database.AuthenticatorService" >
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -63,7 +63,7 @@
         </service>
 
         <service
-            android:name=".io.SyncService"
+            android:name=".database.SyncService"
             android:exported="true"
             android:process=":sync" >
             <intent-filter>

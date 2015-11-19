@@ -1,4 +1,4 @@
-package de.lehrbaum.tworooms.view;
+package de.lehrbaum.tworooms.view.createSet;
 import android.app.*;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -7,16 +7,12 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import de.lehrbaum.tworooms.R;
-import de.lehrbaum.tworooms.io.DatabaseContentProvider;
-import de.lehrbaum.tworooms.io.Set;
+import de.lehrbaum.tworooms.database.Set;
 import de.lehrbaum.tworooms.view.util.BaseActivity;
 
-import static de.lehrbaum.tworooms.io.DatabaseContentProvider.Constants.*;
-import android.widget.*;
+import static de.lehrbaum.tworooms.database.DatabaseContentProvider.Constants.*;
 
 public final class CreateSetActivity extends BaseActivity implements CreateSetFragment.OnFragmentInteractionListener
 {

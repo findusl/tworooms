@@ -9,9 +9,7 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 
-import java.util.List;
-
-import de.lehrbaum.tworooms.view.ChooseRoleActivity;
+import de.lehrbaum.tworooms.view.createSet.ChooseRoleActivity;
 
 import static android.support.test.espresso.Espresso.*;
 import static android.support.test.espresso.action.ViewActions.*;

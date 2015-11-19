@@ -1,15 +1,12 @@
-package de.lehrbaum.tworooms.view;
+package de.lehrbaum.tworooms.view.createSet;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
-import java.util.Arrays;
-
 import de.lehrbaum.tworooms.R;
+import de.lehrbaum.tworooms.database.Set;
 import de.lehrbaum.tworooms.view.util.BaseActivity;
 
 
@@ -64,10 +61,10 @@ public final class ChooseRoleActivity extends BaseActivity {
 		//standard result is canceled
 		if(mFragment == null)
 			return;
-		long [] selection = mFragment.getSelection();
-		if(selection != null) {
+		Set set = mFragment.getSet();
+		if(set != null) {
 			Intent intent = new Intent();
-			intent.putExtra(ChooseRoleFragment.SELECTION_INDEX, selection);
+            set.addToIntent(intent, true);
 			setResult(RESULT_OK, intent);
 		}
 	}
